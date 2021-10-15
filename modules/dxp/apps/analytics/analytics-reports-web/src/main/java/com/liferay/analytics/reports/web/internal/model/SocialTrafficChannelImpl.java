@@ -22,12 +22,14 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,9 +42,12 @@ public class SocialTrafficChannelImpl implements TrafficChannel {
 	public SocialTrafficChannelImpl(boolean error) {
 		_error = error;
 
-		_referringSocialMediaList = Collections.emptyList();
-		_trafficAmount = 0;
-		_trafficShare = 0;
+		_referringSocialMediaList = Arrays.asList(
+			new ReferringSocialMedia("twitter", new Random().nextInt(100)),
+			new ReferringSocialMedia("facebook", new Random().nextInt(100)),
+			new ReferringSocialMedia("instagram", new Random().nextInt(100)));
+		_trafficAmount = 100;
+		_trafficShare = 40;
 	}
 
 	public SocialTrafficChannelImpl(

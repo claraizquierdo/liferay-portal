@@ -21,7 +21,7 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -36,9 +36,15 @@ public class PaidTrafficChannelImpl implements TrafficChannel {
 	public PaidTrafficChannelImpl(boolean error) {
 		_error = error;
 
-		_countrySearchKeywordsList = Collections.emptyList();
-		_trafficAmount = 0;
-		_trafficShare = 0;
+		_countrySearchKeywordsList = Arrays.asList(
+			new CountrySearchKeywords(
+				"es", Arrays.asList(new SearchKeyword("españa", 0, 100, 200))),
+			new CountrySearchKeywords(
+				"en", Arrays.asList(new SearchKeyword("englang", 0, 100, 200))),
+			new CountrySearchKeywords(
+				"fr", Arrays.asList(new SearchKeyword("french", 0, 100, 200))));
+		_trafficAmount = 100;
+		_trafficShare = 40;
 	}
 
 	public PaidTrafficChannelImpl(

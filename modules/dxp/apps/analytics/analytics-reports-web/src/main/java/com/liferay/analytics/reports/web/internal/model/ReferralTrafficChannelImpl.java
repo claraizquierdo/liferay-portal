@@ -22,11 +22,12 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
@@ -38,10 +39,16 @@ public class ReferralTrafficChannelImpl implements TrafficChannel {
 	public ReferralTrafficChannelImpl(boolean error) {
 		_error = error;
 
-		_domainReferringURLs = Collections.emptyList();
-		_pageReferringURLs = Collections.emptyList();
-		_trafficAmount = 0;
-		_trafficShare = 0;
+		_domainReferringURLs = Arrays.asList(
+			new ReferringURL(new Random().nextInt(100), "http://beltran1.com"),
+			new ReferringURL(new Random().nextInt(100), "http://beltran2.com"),
+			new ReferringURL(new Random().nextInt(100), "http://beltran3.com"));
+		_pageReferringURLs = Arrays.asList(
+			new ReferringURL(80, "http://clara.com"),
+			new ReferringURL(15, "http://clara2.com"),
+			new ReferringURL(5, "http://clara3.com"));
+		_trafficAmount = 100;
+		_trafficShare = 40;
 	}
 
 	public ReferralTrafficChannelImpl(
