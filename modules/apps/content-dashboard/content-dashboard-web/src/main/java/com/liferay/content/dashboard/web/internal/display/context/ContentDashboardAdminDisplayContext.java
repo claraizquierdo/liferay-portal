@@ -71,6 +71,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.portlet.ActionURL;
+import javax.portlet.PortletURL;
 import javax.portlet.WindowStateException;
 
 /**
@@ -117,6 +118,12 @@ public class ContentDashboardAdminDisplayContext {
 					_liferayPortletRequest, "assetCategoryId")));
 
 		return _assetCategoryIds;
+	}
+
+	public PortletURL getPortletURL() {
+		return PortletURLBuilder.createRenderURL(
+			_liferayPortletResponse
+		).buildPortletURL();
 	}
 
 	public List<String> getAssetCategoryTitles(
