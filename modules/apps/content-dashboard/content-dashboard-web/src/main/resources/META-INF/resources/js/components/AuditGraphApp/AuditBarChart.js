@@ -21,6 +21,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
 	Bar,
 	BarChart,
+	Brush,
 	CartesianGrid,
 	Cell,
 	Legend,
@@ -45,11 +46,31 @@ const handleKeydown = (event) => {
 };
 
 export default function AuditBarChart({namespace, rtl, vocabularies}) {
+	const intersectionCategories = [];
+	for (let i = 0; i < 40; i++) {
+		intersectionCategories.push({
+			key: `${Math.floor(Math.random() * 10000)}`,
+			name: `${(Math.random() + 1).toString(36).substring(7)}`,
+			value: `${Math.floor(Math.random() * 10000)}`,
+			vocabulary: 'Raylife',
+		});
+	}
+	const voc50x50 = [];
+	for (let i = 0; i < 15; i++) {
+		voc50x50.push({
+			categories: intersectionCategories,
+			key: `${Math.floor(Math.random() * 10000)}`,
+			name: `${(Math.random() + 1).toString(36).substring(7)}`,
+			value: `${Math.floor(Math.random() * 10000)}`,
+			vocabulary: 'audience',
+		});
+	}
+
 	const auditBarChartData = useMemo(() => {
 		const dataKeys = new Set();
 		var maxValue = 0;
 
-		const bars = vocabularies.reduce((acc, category) => {
+		const bars = voc50x50.reduce((acc, category) => {
 			if (!category.categories) {
 				return acc;
 			}
@@ -78,7 +99,7 @@ export default function AuditBarChart({namespace, rtl, vocabularies}) {
 			bars.push(noneBar);
 		}
 
-		const data = vocabularies.map((category) => {
+		const data = voc50x50.map((category) => {
 			if (!category.categories) {
 				if (Number(category.value) > maxValue) {
 					maxValue = Number(category.value);
@@ -211,10 +232,10 @@ export default function AuditBarChart({namespace, rtl, vocabularies}) {
 	const showLegend = !!bars.length;
 
 	const axisNames = {
-		x: vocabularies[0]?.vocabularyName,
+		x: voc50x50[0]?.vocabularyName,
 		y:
 			showLegend &&
-			vocabularies.find(({categories}) => categories)?.categories[0]
+			voc50x50.find(({categories}) => categories)?.categories[0]
 				.vocabularyName,
 	};
 
@@ -273,14 +294,16 @@ export default function AuditBarChart({namespace, rtl, vocabularies}) {
 				/>
 			)}
 			<div className="mb-3 overflow-auto">
-				<ResponsiveContainer height={BAR_CHART.height} width="100%">
+				<ResponsiveContainer height={600} width="100%">
 					<BarChart data={data}>
 						{showLegend && (
 							<Legend
 								align={rtl ? 'right' : 'left'}
 								content={renderLegend}
 								verticalAlign="top"
-								wrapperStyle={{paddingBottom: 24}}
+								wrapperStyle={{
+									paddingBottom: 24,
+								}}
 								yAxisName={axisNames.y}
 							/>
 						)}
@@ -312,6 +335,7 @@ export default function AuditBarChart({namespace, rtl, vocabularies}) {
 								stroke: BAR_CHART.stroke,
 							}}
 							domain={[0, maxValue]}
+							height={300}
 							orientation={rtl ? 'right' : 'left'}
 							tick={<CustomYAxisTick rtl={rtl} />}
 							tickLine={false}
@@ -410,6 +434,13 @@ export default function AuditBarChart({namespace, rtl, vocabularies}) {
 								))}
 							</Bar>
 						)}
+
+						<Brush
+							dataKey="name"
+							endIndex={4}
+							height={30}
+							stroke="#8884d8"
+						/>
 					</BarChart>
 				</ResponsiveContainer>
 			</div>
