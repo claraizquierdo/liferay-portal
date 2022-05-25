@@ -465,6 +465,8 @@ public class ContentDashboardAdminManagementToolbarDisplayContext
 		).setParameter(
 			"singleSelect", false
 		).setParameter(
+			"inheritSelection", true
+		).setParameter(
 			"vocabularyIds",
 			() -> {
 				ThemeDisplay themeDisplay =
