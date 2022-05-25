@@ -122,20 +122,6 @@ public class FragmentEntryConfigurationParserImpl
 		return null;
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
-	 * #getConfigurationJSONObject(String, String, Locale)}
-	 */
-	@Deprecated
-	@Override
-	public JSONObject getConfigurationJSONObject(
-			String configuration, String editableValues)
-		throws JSONException {
-
-		return getConfigurationJSONObject(
-			configuration, editableValues, LocaleUtil.getMostRelevantLocale());
-	}
-
 	@Override
 	public JSONObject getConfigurationJSONObject(
 			String configuration, String editableValues, Locale locale)
@@ -319,6 +305,33 @@ public class FragmentEntryConfigurationParserImpl
 
 	@Override
 	public Object getFieldValue(
+		String editableValues,
+		FragmentConfigurationField fragmentConfigurationField, Locale locale) {
+
+		try {
+			JSONObject editableValuesJSONObject =
+				JSONFactoryUtil.createJSONObject(editableValues);
+
+			JSONObject configurationValuesJSONObject =
+				editableValuesJSONObject.getJSONObject(
+					_KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR);
+
+			if (configurationValuesJSONObject == null) {
+				return StringPool.BLANK;
+			}
+
+			return getFieldValue(
+				fragmentConfigurationField, locale,
+				configurationValuesJSONObject.getString(
+					fragmentConfigurationField.getName()));
+		}
+		catch (Exception exception) {
+			return StringPool.BLANK;
+		}
+	}
+
+	@Override
+	public Object getFieldValue(
 		String configuration, String editableValues, Locale locale,
 		String name) {
 
@@ -360,20 +373,6 @@ public class FragmentEntryConfigurationParserImpl
 		}
 
 		return null;
-	}
-
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
-	 * #getFieldValue(String, String, Locale, String)}
-	 */
-	@Deprecated
-	@Override
-	public Object getFieldValue(
-		String configuration, String editableValues, String name) {
-
-		return getFieldValue(
-			configuration, editableValues, LocaleUtil.getMostRelevantLocale(),
-			name);
 	}
 
 	@Override

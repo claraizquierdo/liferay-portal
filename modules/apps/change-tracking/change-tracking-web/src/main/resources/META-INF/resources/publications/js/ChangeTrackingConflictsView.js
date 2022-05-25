@@ -38,6 +38,7 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 			resolvedConflicts,
 			schedule,
 			scheduleURL,
+			showPageOverwriteWarning,
 			spritemap,
 			timeZone,
 			unresolvedConflicts,
@@ -49,6 +50,7 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 		this.resolvedConflicts = resolvedConflicts;
 		this.schedule = schedule;
 		this.scheduleURL = scheduleURL;
+		this.showPageOverwriteWarning = showPageOverwriteWarning;
 		this.spritemap = spritemap;
 		this.timeZone = timeZone;
 		this.unresolvedConflicts = unresolvedConflicts;
@@ -107,6 +109,16 @@ class ChangeTrackingConflictsView extends ChangeTrackingBaseScheduleView {
 							spritemap={this.spritemap}
 							title={Liferay.Language.get(
 								'no-unresolved-conflicts-ready-to-publish'
+							)}
+						/>
+					)}
+
+					{this.showPageOverwriteWarning && (
+						<ClayAlert
+							displayType="info"
+							spritemap={this.spritemap}
+							title={Liferay.Language.get(
+								"this-publication-contains-changes-to-a-content-page.-publishing-these-changes-will-fully-overwrite-the-page's-content-and-layout-in-production"
 							)}
 						/>
 					)}

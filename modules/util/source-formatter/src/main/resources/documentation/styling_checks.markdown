@@ -32,6 +32,7 @@ EnumConstantDividerCheck | .java | Find unnecessary empty lines between enum con
 EnumConstantOrderCheck | .java | Checks the order of enum constants. |
 EqualClauseIfStatementsCheck | .java | Finds consecutive if-statements with identical clauses. |
 [ExceptionMessageCheck](check/message_check.markdown#messagecheck) | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Validates messages that are passed to exceptions. |
+[FDSTableSchemaBuilderCheck](check/fds_table_schema_builder_check.markdown#fdstableschemabuildercheck) | .java | Finds cases where `add` should be used. |
 FTLEmptyLinesCheck | .ftl | Finds missing and unnecessary empty lines. |
 [FTLIfStatementCheck](check/if_statement_check.markdown#ifstatementcheck) | .ftl | Finds incorrect use of parentheses in statement. |
 FTLImportsCheck | .ftl | Sorts and groups imports in `.ftl` files. |
@@ -90,8 +91,8 @@ JavaStylingCheck | .java | Applies rules to enforce consistency in code style. |
 JavaTermDividersCheck | .java | Finds missing or unnecessary empty lines between javaterms. |
 JavaTermOrderCheck | .java | Checks the order of javaterms. |
 JavaTermStylingCheck | .java | Applies rules to enforce consistency in code style. |
-LDIFEntryOrderCheck | .ldif | Checks the order of entries and attributes in `.ldif` file. |
-LDIFWhitespaceCheck | .ldif | Finds missing and unnecessary whitespace. |
+LDIFEntryOrderCheck | | Checks the order of entries and attributes in `.ldif` file. |
+LDIFWhitespaceCheck | | Finds missing and unnecessary whitespace. |
 [LambdaCheck](check/lambda_check.markdown#lambdacheck) | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Checks that `lambda` statements are as simple as possible. |
 [ListUtilCheck](check/list_util_check.markdown#listutilcheck) | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Checks for utilization of class `ListUtil`. |
 LiteralStringEqualsCheck | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Finds cases where `Objects.equals` should be used. |

@@ -14,13 +14,13 @@
 
 package com.liferay.commerce.qualifier.service.impl;
 
+import com.liferay.commerce.qualifier.helper.CommerceQualifierHelper;
 import com.liferay.commerce.qualifier.metadata.CommerceQualifierMetadata;
 import com.liferay.commerce.qualifier.metadata.CommerceQualifierMetadataRegistry;
 import com.liferay.commerce.qualifier.model.CommerceQualifierEntry;
 import com.liferay.commerce.qualifier.model.CommerceQualifierEntryTable;
 import com.liferay.commerce.qualifier.search.context.CommerceQualifierSearchContext;
 import com.liferay.commerce.qualifier.service.base.CommerceQualifierEntryLocalServiceBaseImpl;
-import com.liferay.commerce.qualifier.util.CommerceQualifierUtil;
 import com.liferay.petra.sql.dsl.Column;
 import com.liferay.petra.sql.dsl.DSLFunctionFactoryUtil;
 import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
@@ -454,22 +454,24 @@ public class CommerceQualifierEntryLocalServiceImpl
 		Predicate subpredicate = null;
 
 		for (String allowedTargetClassName : allowedTargetClassNames) {
-			CommerceQualifierEntryTable tableAlias =
-				CommerceQualifierUtil.getCommerceQualifierTableAlias(
+			CommerceQualifierEntryTable aliasCommerceQualifierEntryTable =
+				_commerceQualifierHelper.getAliasCommerceQualifierEntryTable(
 					sourceCommerceQualifierMetadata.getModelClassName(),
 					allowedTargetClassName);
 
 			joinStep = joinStep.leftJoinOn(
-				tableAlias,
+				aliasCommerceQualifierEntryTable,
 				_getPredicate(
-					tableAlias.sourceClassNameId,
+					aliasCommerceQualifierEntryTable.sourceClassNameId,
 					sourceCommerceQualifierMetadata.getModelClassName(),
-					tableAlias.sourceClassPK,
+					aliasCommerceQualifierEntryTable.sourceClassPK,
 					sourceCommerceQualifierMetadata.getPrimaryKeyColumn(),
-					tableAlias.targetClassNameId, allowedTargetClassName));
+					aliasCommerceQualifierEntryTable.targetClassNameId,
+					allowedTargetClassName));
 
 			Predicate targetPredicate = _getTargetPredicate(
-				tableAlias.commerceQualifierEntryId, tableAlias.targetClassPK,
+				aliasCommerceQualifierEntryTable.commerceQualifierEntryId,
+				aliasCommerceQualifierEntryTable.targetClassPK,
 				targetAttributes.get(allowedTargetClassName));
 
 			if (subpredicate == null) {
@@ -591,6 +593,9 @@ public class CommerceQualifierEntryLocalServiceImpl
 			primaryKeyColumn.isNull()
 		).withParentheses();
 	}
+
+	@Reference
+	private CommerceQualifierHelper _commerceQualifierHelper;
 
 	@Reference
 	private CommerceQualifierMetadataRegistry

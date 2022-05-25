@@ -155,16 +155,6 @@ public class NotificationTemplateSerDes {
 			sb.append("\"");
 		}
 
-		if (notificationTemplate.getEnable() != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"enable\": ");
-
-			sb.append(notificationTemplate.getEnable());
-		}
-
 		if (notificationTemplate.getFrom() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -240,11 +230,7 @@ public class NotificationTemplateSerDes {
 
 			sb.append("\"to\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(notificationTemplate.getTo()));
-
-			sb.append("\"");
+			sb.append(_toJSON(notificationTemplate.getTo()));
 		}
 
 		sb.append("}");
@@ -327,13 +313,6 @@ public class NotificationTemplateSerDes {
 			map.put(
 				"description",
 				String.valueOf(notificationTemplate.getDescription()));
-		}
-
-		if (notificationTemplate.getEnable() == null) {
-			map.put("enable", null);
-		}
-		else {
-			map.put("enable", String.valueOf(notificationTemplate.getEnable()));
 		}
 
 		if (notificationTemplate.getFrom() == null) {
@@ -452,12 +431,6 @@ public class NotificationTemplateSerDes {
 						(String)jsonParserFieldValue);
 				}
 			}
-			else if (Objects.equals(jsonParserFieldName, "enable")) {
-				if (jsonParserFieldValue != null) {
-					notificationTemplate.setEnable(
-						(Boolean)jsonParserFieldValue);
-				}
-			}
 			else if (Objects.equals(jsonParserFieldName, "from")) {
 				if (jsonParserFieldValue != null) {
 					notificationTemplate.setFrom((String)jsonParserFieldValue);
@@ -497,7 +470,9 @@ public class NotificationTemplateSerDes {
 			}
 			else if (Objects.equals(jsonParserFieldName, "to")) {
 				if (jsonParserFieldValue != null) {
-					notificationTemplate.setTo((String)jsonParserFieldValue);
+					notificationTemplate.setTo(
+						(Map)NotificationTemplateSerDes.toMap(
+							(String)jsonParserFieldValue));
 				}
 			}
 		}

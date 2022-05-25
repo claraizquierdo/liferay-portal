@@ -13,6 +13,7 @@
  */
 
 import ClayLoadingIndicator from '@clayui/loading-indicator';
+import classNames from 'classnames';
 import React, {useMemo} from 'react';
 
 import {ALLOWED_INPUT_TYPES} from '../../../../../../app/config/constants/allowedInputTypes';
@@ -30,6 +31,7 @@ import selectFragmentEntryLink from '../../../../../../app/selectors/selectFragm
 import selectLanguageId from '../../../../../../app/selectors/selectLanguageId';
 import selectSegmentsExperienceId from '../../../../../../app/selectors/selectSegmentsExperienceId';
 import FormService from '../../../../../../app/services/FormService';
+import InfoItemService from '../../../../../../app/services/InfoItemService';
 import updateEditableValues from '../../../../../../app/thunks/updateEditableValues';
 import {CACHE_KEYS} from '../../../../../../app/utils/cache';
 import {setIn} from '../../../../../../app/utils/setIn';
@@ -83,6 +85,23 @@ const INPUT_COMMON_CONFIGURATION = [
 	},
 ];
 
+function getTypeLabels(itemTypes, classNameId, classTypeId) {
+	if (!itemTypes) {
+		return {};
+	}
+
+	const selectedType = itemTypes.find(({value}) => value === classNameId);
+
+	const selectedSubtype = selectedType.subtypes.length
+		? selectedType.subtypes.find(({value}) => value === classTypeId)
+		: {};
+
+	return {
+		subtype: selectedSubtype.label,
+		type: selectedType.label,
+	};
+}
+
 export function FormInputGeneralPanel({item}) {
 	const dispatch = useDispatch();
 	const languageId = useSelector(selectLanguageId);
@@ -109,8 +128,18 @@ export function FormInputGeneralPanel({item}) {
 			);
 		}
 
+		const fieldSetsWithoutLabel =
+			fragmentEntryLinkRef.current.configuration?.fieldSets?.filter(
+				(fieldSet) => !fieldSet.configurationRole && !fieldSet.label
+			) ?? [];
+
+		nextFields = [
+			...nextFields,
+			...fieldSetsWithoutLabel.flatMap((fieldSet) => fieldSet.fields),
+		];
+
 		return nextFields;
-	}, [configurationValues]);
+	}, [configurationValues, fragmentEntryLinkRef]);
 
 	const handleValueSelect = (key, value) => {
 		const keyPath = [FREEMARKER_FRAGMENT_ENTRY_PROCESSOR, key];
@@ -189,6 +218,16 @@ function FormInputMappingOptions({configurationValues, item, onValueSelect}) {
 			return element.querySelector('input')?.type || 'text';
 		},
 		[item.itemId]
+	);
+
+	const itemTypes = useCache({
+		fetcher: () => InfoItemService.getAvailableInfoItemFormProviders(),
+		key: [CACHE_KEYS.itemTypes],
+	});
+
+	const {subtype, type} = useMemo(
+		() => getTypeLabels(itemTypes, classNameId, classTypeId),
+		[itemTypes, classNameId, classTypeId]
 	);
 
 	const fields = useCache({
@@ -276,14 +315,46 @@ function FormInputMappingOptions({configurationValues, item, onValueSelect}) {
 	}
 
 	return filteredFields ? (
-		<MappingFieldSelector
-			fieldType={inputType}
-			fields={filteredFields}
-			onValueSelect={(event) =>
-				onValueSelect(FIELD_ID_CONFIGURATION_KEY, event.target.value)
-			}
-			value={configurationValues[FIELD_ID_CONFIGURATION_KEY] || ''}
-		/>
+		<>
+			<MappingFieldSelector
+				fieldType={inputType}
+				fields={filteredFields}
+				onValueSelect={(event) =>
+					onValueSelect(
+						FIELD_ID_CONFIGURATION_KEY,
+						event.target.value
+					)
+				}
+				value={configurationValues[FIELD_ID_CONFIGURATION_KEY] || ''}
+			/>
+			{type && (
+				<p
+					className={classNames(
+						'page-editor__mapping-panel__type-label',
+						{
+							'mb-0': subtype,
+							'mb-3': !subtype,
+						}
+					)}
+				>
+					<span className="mr-1">
+						{Liferay.Language.get('content-type')}:
+					</span>
+
+					{type}
+				</p>
+			)}
+
+			{subtype && (
+				<p className="mb-3 page-editor__mapping-panel__type-label">
+					<span className="mr-1">
+						{Liferay.Language.get('subtype')}:
+					</span>
+
+					{subtype}
+				</p>
+			)}
+		</>
 	) : (
 		<ClayLoadingIndicator />
 	);

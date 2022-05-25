@@ -71,6 +71,7 @@ ExceptionMapperAnnotationCheck | [Bug Prevention](bug_prevention_checks.markdown
 [ExceptionMessageCheck](check/message_check.markdown#messagecheck) | [Styling](styling_checks.markdown#styling-checks) | .java, .jsp, .jspf, .jspx, .tag, .tpl or .vm | Validates messages that are passed to exceptions. |
 ExceptionPrintStackTraceCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .java | Avoid using printStackTrace. |
 ExceptionVariableNameCheck | [Naming Conventions](naming_conventions_checks.markdown#naming-conventions-checks) | .java | Validates variable names that have type `*Exception`. |
+[FDSTableSchemaBuilderCheck](check/fds_table_schema_builder_check.markdown#fdstableschemabuildercheck) | [Styling](styling_checks.markdown#styling-checks) | .java | Finds cases where `add` should be used. |
 FTLEmptyLinesCheck | [Styling](styling_checks.markdown#styling-checks) | .ftl | Finds missing and unnecessary empty lines. |
 [FTLIfStatementCheck](check/if_statement_check.markdown#ifstatementcheck) | [Styling](styling_checks.markdown#styling-checks) | .ftl | Finds incorrect use of parentheses in statement. |
 FTLImportsCheck | [Styling](styling_checks.markdown#styling-checks) | .ftl | Sorts and groups imports in `.ftl` files. |
@@ -268,8 +269,8 @@ JavaVerifyUpgradeConnectionCheck | [Bug Prevention](bug_prevention_checks.markdo
 JavaXMLSecurityCheck | [Security](security_checks.markdown#security-checks) | .java | Finds possible XXE or Quadratic Blowup security vulnerabilities. |
 JavadocCheck | [Javadoc](javadoc_checks.markdown#javadoc-checks) | .java | Performs several checks on javadoc. |
 [JavadocStyleCheck](https://checkstyle.sourceforge.io/config_javadoc.html#JavadocStyle) | [Javadoc](javadoc_checks.markdown#javadoc-checks) | .java | Validates Javadoc comments to help ensure they are well formed. |
-LDIFEntryOrderCheck | [Styling](styling_checks.markdown#styling-checks) | .ldif | Checks the order of entries and attributes in `.ldif` file. |
-LDIFWhitespaceCheck | [Styling](styling_checks.markdown#styling-checks) | .ldif | Finds missing and unnecessary whitespace. |
+LDIFEntryOrderCheck | [Styling](styling_checks.markdown#styling-checks) | | Checks the order of entries and attributes in `.ldif` file. |
+LDIFWhitespaceCheck | [Styling](styling_checks.markdown#styling-checks) | | Finds missing and unnecessary whitespace. |
 LFRBuildContentCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .lfrbuild-* | Finds `.lfrbuild*` files that are not empty. |
 LFRBuildReadmeCheck | [Documentation](documentation_checks.markdown#documentation-checks) | .lfrbuild-* | Checks that `.lfrbuild*` files are documented in a marker file. |
 LPS42924Check | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .java | Finds cases where `PortalUtil.getClassName*` (instead of calling `classNameLocalService` directly). |
@@ -340,6 +341,7 @@ PropertiesCommentsCheck | [Styling](styling_checks.markdown#styling-checks) | .e
 PropertiesDefinitionKeysCheck | [Styling](styling_checks.markdown#styling-checks) | .eslintignore, .prettierignore or .properties | Sorts definition keys in `liferay-plugin-package.properties` file. |
 PropertiesDependenciesFileCheck | [Styling](styling_checks.markdown#styling-checks) | .eslintignore, .prettierignore or .properties | Sorts the properties in `dependencies.properties` file. |
 PropertiesEmptyLinesCheck | [Styling](styling_checks.markdown#styling-checks) | .eslintignore, .prettierignore or .properties | Finds missing and unnecessary empty lines. |
+PropertiesEnvironmentVariablesCheck | [Documentation](documentation_checks.markdown#documentation-checks) | .eslintignore, .prettierignore or .properties | Verifies that the environment property in the documentation matches the property name. |
 PropertiesImportedFilesContentCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .eslintignore, .prettierignore or .properties | Performs several checks on `imported-files.properties` file. |
 [PropertiesLanguageKeysCheck](check/properties_language_keys_check.markdown#propertieslanguagekeyscheck) | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .eslintignore, .prettierignore or .properties | Checks that there is no HTML markup in language keys. |
 PropertiesLanguageKeysOrderCheck | [Styling](styling_checks.markdown#styling-checks) | .eslintignore, .prettierignore or .properties | Sort language keys in `Language.properties` file. |
@@ -347,7 +349,6 @@ PropertiesLiferayPluginPackageFileCheck | [Bug Prevention](bug_prevention_checks
 PropertiesLiferayPluginPackageLiferayVersionsCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .eslintignore, .prettierignore or .properties | Validates the version in `liferay-plugin-package.properties` file. |
 PropertiesLongLinesCheck | [Styling](styling_checks.markdown#styling-checks) | .eslintignore, .prettierignore or .properties | Finds lines that are longer than the specified maximum line length. |
 PropertiesMultiLineValuesOrderCheck | [Styling](styling_checks.markdown#styling-checks) | .eslintignore, .prettierignore or .properties | Verifies that property with multiple values is not on a single line. |
-PropertiesPortalEnvironmentVariablesCheck | [Documentation](documentation_checks.markdown#documentation-checks) | .eslintignore, .prettierignore or .properties | Verifies that the environment property in the documentation matches the property name. |
 PropertiesPortalFileCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .eslintignore, .prettierignore or .properties | Performs several checks on `portal.properties` or `portal-*.properties` file. |
 PropertiesPortletFileCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .eslintignore, .prettierignore or .properties | Performs several checks on `portlet.properties` file. |
 PropertiesReleaseBuildCheck | [Bug Prevention](bug_prevention_checks.markdown#bug-prevention-checks) | .eslintignore, .prettierignore or .properties | Verifies that the information in `release.properties` matches the information in `ReleaseInfo.java`. |

@@ -196,7 +196,6 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 		notificationTemplate.setDescription(regex);
 		notificationTemplate.setFrom(regex);
 		notificationTemplate.setName(regex);
-		notificationTemplate.setTo(regex);
 
 		String json = NotificationTemplateSerDes.toJSON(notificationTemplate);
 
@@ -209,7 +208,6 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 		Assert.assertEquals(regex, notificationTemplate.getDescription());
 		Assert.assertEquals(regex, notificationTemplate.getFrom());
 		Assert.assertEquals(regex, notificationTemplate.getName());
-		Assert.assertEquals(regex, notificationTemplate.getTo());
 	}
 
 	@Test
@@ -1001,14 +999,6 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("enable", additionalAssertFieldName)) {
-				if (notificationTemplate.getEnable() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
 			if (Objects.equals("from", additionalAssertFieldName)) {
 				if (notificationTemplate.getFrom() == null) {
 					valid = false;
@@ -1229,17 +1219,6 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("enable", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						notificationTemplate1.getEnable(),
-						notificationTemplate2.getEnable())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
 			if (Objects.equals("from", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
 						notificationTemplate1.getFrom(),
@@ -1307,9 +1286,9 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 			}
 
 			if (Objects.equals("to", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						notificationTemplate1.getTo(),
-						notificationTemplate2.getTo())) {
+				if (!equals(
+						(Map)notificationTemplate1.getTo(),
+						(Map)notificationTemplate2.getTo())) {
 
 					return false;
 				}
@@ -1517,11 +1496,6 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 			return sb.toString();
 		}
 
-		if (entityFieldName.equals("enable")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
-		}
-
 		if (entityFieldName.equals("from")) {
 			sb.append("'");
 			sb.append(String.valueOf(notificationTemplate.getFrom()));
@@ -1559,11 +1533,8 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 		}
 
 		if (entityFieldName.equals("to")) {
-			sb.append("'");
-			sb.append(String.valueOf(notificationTemplate.getTo()));
-			sb.append("'");
-
-			return sb.toString();
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
 		}
 
 		throw new IllegalArgumentException(
@@ -1618,11 +1589,9 @@ public abstract class BaseNotificationTemplateResourceTestCase {
 				dateModified = RandomTestUtil.nextDate();
 				description = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
-				enable = RandomTestUtil.randomBoolean();
 				from = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				id = RandomTestUtil.randomLong();
 				name = StringUtil.toLowerCase(RandomTestUtil.randomString());
-				to = StringUtil.toLowerCase(RandomTestUtil.randomString());
 			}
 		};
 	}

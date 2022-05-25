@@ -54,9 +54,9 @@ public class NotificationTemplateLocalServiceImpl
 	@Override
 	public NotificationTemplate addNotificationTemplate(
 			long userId, String bcc, Map<Locale, String> bodyMap, String cc,
-			String description, boolean enabled, String from,
-			Map<Locale, String> fromNameMap, String name,
-			Map<Locale, String> subjectMap, String to)
+			String description, String from, Map<Locale, String> fromNameMap,
+			String name, Map<Locale, String> subjectMap,
+			Map<Locale, String> toMap)
 		throws PortalException {
 
 		_validate(name, from);
@@ -75,12 +75,11 @@ public class NotificationTemplateLocalServiceImpl
 		notificationTemplate.setBodyMap(bodyMap);
 		notificationTemplate.setCc(cc);
 		notificationTemplate.setDescription(description);
-		notificationTemplate.setEnabled(enabled);
 		notificationTemplate.setFrom(from);
 		notificationTemplate.setFromNameMap(fromNameMap);
 		notificationTemplate.setName(name);
 		notificationTemplate.setSubjectMap(subjectMap);
-		notificationTemplate.setTo(to);
+		notificationTemplate.setToMap(toMap);
 
 		notificationTemplate = notificationTemplatePersistence.update(
 			notificationTemplate);
@@ -141,8 +140,8 @@ public class NotificationTemplateLocalServiceImpl
 	public NotificationTemplate updateNotificationTemplate(
 			long notificationTemplateId, String bcc,
 			Map<Locale, String> bodyMap, String cc, String description,
-			boolean enabled, String from, Map<Locale, String> fromNameMap,
-			String name, Map<Locale, String> subjectMap, String to)
+			String from, Map<Locale, String> fromNameMap, String name,
+			Map<Locale, String> subjectMap, Map<Locale, String> toMap)
 		throws PortalException {
 
 		_validate(name, from);
@@ -155,12 +154,11 @@ public class NotificationTemplateLocalServiceImpl
 		notificationTemplate.setBodyMap(bodyMap);
 		notificationTemplate.setCc(cc);
 		notificationTemplate.setDescription(description);
-		notificationTemplate.setEnabled(enabled);
 		notificationTemplate.setFrom(from);
 		notificationTemplate.setFromNameMap(fromNameMap);
 		notificationTemplate.setName(name);
 		notificationTemplate.setSubjectMap(subjectMap);
-		notificationTemplate.setTo(to);
+		notificationTemplate.setToMap(toMap);
 
 		return notificationTemplatePersistence.update(notificationTemplate);
 	}

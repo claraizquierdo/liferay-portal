@@ -9,7 +9,7 @@ import org.gradle.util.GUtil
 
 buildscript {
 	dependencies {
-		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.defaults", version: "7.0.328"
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.defaults", version: "7.0.329"
 		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.maven.plugin.builder", version: "1.2.3"
 		classpath group: "de.undercouch", name: "gradle-download-task", version: "3.3.0"
 		classpath group: "gradle.plugin.org.ysb33r.gradle", name: "gradletest", version: "1.1"
@@ -45,10 +45,6 @@ apply plugin: "com.liferay.poshi.runner"
 apply plugin: "com.liferay.poshi.runner.resources.defaults"
 
 poshiRunner {
-	if (project.hasProperty("poshiRunnerExtProperties")) {
-		poshiPropertiesFile = new File(projectDir.parentFile, project.properties["poshiRunnerExtProperties"])
-	}
-
 	openCVVersion = "2.4.10-0.10"
 }
 

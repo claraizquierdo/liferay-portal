@@ -21,6 +21,8 @@ import com.liferay.document.library.web.internal.display.context.helper.DLPortle
 import com.liferay.document.library.web.internal.display.context.helper.DLRequestHelper;
 import com.liferay.document.library.web.internal.display.context.logic.UIItemsBuilder;
 import com.liferay.document.library.web.internal.helper.DLTrashHelper;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemListBuilder;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.servlet.taglib.ui.Menu;
@@ -55,6 +57,42 @@ public class DefaultDLViewFileEntryHistoryDisplayContext
 		_uiItemsBuilder = new UIItemsBuilder(
 			httpServletRequest, fileVersion, _resourceBundle, dlTrashHelper,
 			versioningStrategy, dlURLHelper);
+	}
+
+	@Override
+	public List<DropdownItem> getActionDropdownItems() throws PortalException {
+		if (!_dlPortletInstanceSettingsHelper.isShowActions()) {
+			return null;
+		}
+
+		return DropdownItemListBuilder.addGroup(
+			dropdownGroupItem -> {
+				dropdownGroupItem.setDropdownItems(
+					DropdownItemListBuilder.add(
+						_uiItemsBuilder::isDownloadActionAvailable,
+						_uiItemsBuilder.createDownloadDropdownItem()
+					).add(
+						_uiItemsBuilder::isViewVersionActionAvailable,
+						_uiItemsBuilder.createViewVersionDropdownItem()
+					).add(
+						_uiItemsBuilder::isRevertToVersionActionAvailable,
+						_uiItemsBuilder.createRevertVersionDropdownItem()
+					).add(
+						_uiItemsBuilder::isCompareToActionAvailable,
+						_uiItemsBuilder.createCompareToDropdownItem()
+					).build());
+				dropdownGroupItem.setSeparator(true);
+			}
+		).addGroup(
+			dropdownGroupItem -> {
+				dropdownGroupItem.setDropdownItems(
+					DropdownItemListBuilder.add(
+						_uiItemsBuilder::isDeleteVersionActionAvailable,
+						_uiItemsBuilder.createDeleteVersionDropdownItem()
+					).build());
+				dropdownGroupItem.setSeparator(true);
+			}
+		).build();
 	}
 
 	@Override

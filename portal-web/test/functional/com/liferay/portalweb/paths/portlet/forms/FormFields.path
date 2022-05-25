@@ -326,7 +326,7 @@
 </tr>
 <tr>
 	<td>DATE_FIELD</td>
-	<td>//div[contains(@data-field-name,'${key_fieldName}')]//input[@type='text'] | //div[@class='ddm-field']//label[text()='${key_fieldName}']/..//input</td>
+	<td>//div[contains(@data-field-name,'${key_fieldName}')]//input[@type='text'] | //div[@class='ddm-field']//label[text()='Date']/..//input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -560,6 +560,11 @@
 <tr>
 	<td>INPUT_MASK_VALUE</td>
 	<td>//div[contains(concat(' ',normalize-space(@class),' '),'ddm-field-container')]//div[@class='form-group']//input[@placeholder='${key_inputMaskValue}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>INPUT_MASK_DECIMAL_PLACES</td>
+	<td>//div[@class='form-group']//label[text()='Decimal Places']/..//input</td>
 	<td></td>
 </tr>
 <tr>

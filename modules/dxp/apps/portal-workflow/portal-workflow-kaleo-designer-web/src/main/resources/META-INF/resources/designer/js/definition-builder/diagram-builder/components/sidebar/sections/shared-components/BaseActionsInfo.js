@@ -185,7 +185,9 @@ const BaseActionsInfo = ({
 
 				<span
 					className="ml-1"
-					title={Liferay.Language.get('label-name')}
+					title={Liferay.Language.get(
+						'lower-numbers-represent-higher-priority'
+					)}
 				>
 					<ClayIcon
 						className="text-muted"

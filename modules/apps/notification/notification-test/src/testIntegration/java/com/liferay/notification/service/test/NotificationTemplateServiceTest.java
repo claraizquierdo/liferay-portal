@@ -156,14 +156,15 @@ public class NotificationTemplateServiceTest {
 			user.getUserId(), RandomTestUtil.randomString(),
 			Collections.singletonMap(
 				LocaleUtil.US, RandomTestUtil.randomString()),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(), true,
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(),
 			Collections.singletonMap(
 				LocaleUtil.US, RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
 			Collections.singletonMap(
 				LocaleUtil.US, RandomTestUtil.randomString()),
-			RandomTestUtil.randomString());
+			Collections.singletonMap(
+				LocaleUtil.US, RandomTestUtil.randomString()));
 	}
 
 	private void _setUser(User user) {
@@ -185,14 +186,15 @@ public class NotificationTemplateServiceTest {
 					Collections.singletonMap(
 						LocaleUtil.US, RandomTestUtil.randomString()),
 					RandomTestUtil.randomString(),
-					RandomTestUtil.randomString(), true,
+					RandomTestUtil.randomString(),
 					RandomTestUtil.randomString(),
 					Collections.singletonMap(
 						LocaleUtil.US, RandomTestUtil.randomString()),
 					RandomTestUtil.randomString(),
 					Collections.singletonMap(
 						LocaleUtil.US, RandomTestUtil.randomString()),
-					RandomTestUtil.randomString());
+					Collections.singletonMap(
+						LocaleUtil.US, RandomTestUtil.randomString()));
 		}
 		finally {
 			if (notificationTemplate != null) {
@@ -263,14 +265,15 @@ public class NotificationTemplateServiceTest {
 					Collections.singletonMap(
 						LocaleUtil.US, RandomTestUtil.randomString()),
 					RandomTestUtil.randomString(),
-					RandomTestUtil.randomString(), true,
+					RandomTestUtil.randomString(),
 					RandomTestUtil.randomString(),
 					Collections.singletonMap(
 						LocaleUtil.US, RandomTestUtil.randomString()),
 					RandomTestUtil.randomString(),
 					Collections.singletonMap(
 						LocaleUtil.US, RandomTestUtil.randomString()),
-					RandomTestUtil.randomString());
+					Collections.singletonMap(
+						LocaleUtil.US, RandomTestUtil.randomString()));
 		}
 		finally {
 			if (notificationTemplate != null) {

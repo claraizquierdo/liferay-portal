@@ -21,6 +21,7 @@ import com.liferay.object.constants.ObjectActionTriggerConstants;
 import com.liferay.object.model.ObjectAction;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
+import com.liferay.object.runtime.scripting.executor.GroovyScriptingExecutor;
 import com.liferay.object.service.ObjectActionLocalService;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
@@ -33,12 +34,15 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.util.PropsTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.Props;
+import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -48,12 +52,15 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import java.io.Serializable;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -70,6 +77,18 @@ public class ObjectActionLocalServiceTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new LiferayIntegrationTestRule();
 
+	@BeforeClass
+	public static void setUpClass() {
+		_props = PropsUtil.getProps();
+
+		PropsTestUtil.setProps("feature.flag.LPS-152181", "true");
+	}
+
+	@AfterClass
+	public static void tearDownClass() {
+		PropsUtil.setProps(_props);
+	}
+
 	@Before
 	public void setUp() throws Exception {
 		_objectDefinition = ObjectDefinitionTestUtil.addObjectDefinition(
@@ -84,21 +103,20 @@ public class ObjectActionLocalServiceTest {
 				TestPropsValues.getUserId(),
 				_objectDefinition.getObjectDefinitionId());
 
-		_originalHttp = (Http)ReflectionTestUtil.getAndSetFieldValue(
-			_objectActionExecutorRegistry.getObjectActionExecutor(
-				ObjectActionExecutorConstants.KEY_WEBHOOK),
-			"_http",
-			ProxyUtil.newProxyInstance(
-				Http.class.getClassLoader(), new Class<?>[] {Http.class},
-				(proxy, method, arguments) -> {
-					_argumentsList.add(arguments);
-
-					return null;
-				}));
+		_originalGroovyScriptingExecutor =
+			(GroovyScriptingExecutor)_getAndSetFieldValue(
+				GroovyScriptingExecutor.class, "_groovyScriptingExecutor",
+				ObjectActionExecutorConstants.KEY_GROOVY);
+		_originalHttp = (Http)_getAndSetFieldValue(
+			Http.class, "_http", ObjectActionExecutorConstants.KEY_WEBHOOK);
 	}
 
 	@After
 	public void tearDown() {
+		ReflectionTestUtil.setFieldValue(
+			_objectActionExecutorRegistry.getObjectActionExecutor(
+				ObjectActionExecutorConstants.KEY_GROOVY),
+			"_groovyScriptingExecutor", _originalGroovyScriptingExecutor);
 		ReflectionTestUtil.setFieldValue(
 			_objectActionExecutorRegistry.getObjectActionExecutor(
 				ObjectActionExecutorConstants.KEY_WEBHOOK),
@@ -185,6 +203,12 @@ public class ObjectActionLocalServiceTest {
 			JSONUtil.getValue(
 				payloadJSONObject, "JSONObject/objectEntry",
 				"JSONObject/values", "Object/firstName"));
+		Assert.assertEquals(
+			"John",
+			JSONUtil.getValue(
+				payloadJSONObject,
+				"JSONObject/objectEntryDTO" + _objectDefinition.getShortName(),
+				"JSONObject/properties", "Object/firstName"));
 		Assert.assertNull(
 			JSONUtil.getValue(
 				payloadJSONObject, "JSONObject/originalObjectEntry"));
@@ -218,6 +242,12 @@ public class ObjectActionLocalServiceTest {
 			JSONUtil.getValue(
 				payloadJSONObject, "JSONObject/objectEntry",
 				"JSONObject/values", "Object/firstName"));
+		Assert.assertEquals(
+			"John",
+			JSONUtil.getValue(
+				payloadJSONObject,
+				"JSONObject/objectEntryDTO" + _objectDefinition.getShortName(),
+				"JSONObject/properties", "Object/firstName"));
 		Assert.assertEquals(
 			WorkflowConstants.STATUS_DRAFT,
 			JSONUtil.getValue(
@@ -267,6 +297,12 @@ public class ObjectActionLocalServiceTest {
 				payloadJSONObject, "JSONObject/objectEntry",
 				"JSONObject/values", "Object/firstName"));
 		Assert.assertEquals(
+			"João",
+			JSONUtil.getValue(
+				payloadJSONObject,
+				"JSONObject/objectEntryDTO" + _objectDefinition.getShortName(),
+				"JSONObject/properties", "Object/firstName"));
+		Assert.assertEquals(
 			WorkflowConstants.STATUS_APPROVED,
 			JSONUtil.getValue(
 				payloadJSONObject, "JSONObject/originalObjectEntry",
@@ -314,6 +350,12 @@ public class ObjectActionLocalServiceTest {
 			JSONUtil.getValue(
 				payloadJSONObject, "JSONObject/objectEntry",
 				"JSONObject/values", "Object/firstName"));
+		Assert.assertEquals(
+			"João",
+			JSONUtil.getValue(
+				payloadJSONObject,
+				"JSONObject/objectEntryDTO" + _objectDefinition.getShortName(),
+				"JSONObject/properties", "Object/firstName"));
 		Assert.assertNull(
 			JSONUtil.getValue(
 				payloadJSONObject, "JSONObject/originalObjectEntry"));
@@ -326,6 +368,62 @@ public class ObjectActionLocalServiceTest {
 		_objectActionLocalService.deleteObjectAction(objectAction1);
 		_objectActionLocalService.deleteObjectAction(objectAction2);
 		_objectActionLocalService.deleteObjectAction(objectAction3);
+	}
+
+	@Test
+	public void testAddObjectActionWithConditionExpression() throws Exception {
+		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
+			TestPropsValues.getUserId(),
+			_objectDefinition.getObjectDefinitionId(), true,
+			"equals(firstName, \"João\")", RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(),
+			ObjectActionExecutorConstants.KEY_GROOVY,
+			ObjectActionTriggerConstants.KEY_ON_AFTER_DELETE,
+			UnicodePropertiesBuilder.put(
+				"script", "println \"Hello World\""
+			).build());
+
+		// Add object entry with unsatisfied condition
+
+		ObjectEntry objectEntry = _objectEntryLocalService.addObjectEntry(
+			TestPropsValues.getUserId(), 0,
+			_objectDefinition.getObjectDefinitionId(),
+			HashMapBuilder.<String, Serializable>put(
+				"firstName", "John"
+			).build(),
+			ServiceContextTestUtil.getServiceContext());
+
+		_objectEntryLocalService.deleteObjectEntry(objectEntry);
+
+		Assert.assertNull(_argumentsList.poll());
+
+		// Add object entry with satisfied condition
+
+		objectEntry = _objectEntryLocalService.addObjectEntry(
+			TestPropsValues.getUserId(), 0,
+			_objectDefinition.getObjectDefinitionId(),
+			HashMapBuilder.<String, Serializable>put(
+				"firstName", "João"
+			).build(),
+			ServiceContextTestUtil.getServiceContext());
+
+		objectEntry = _objectEntryLocalService.deleteObjectEntry(objectEntry);
+
+		Object[] arguments = _argumentsList.poll();
+
+		Assert.assertEquals(
+			HashMapBuilder.putAll(
+				objectEntry.getModelAttributes()
+			).put(
+				"currentUserId", TestPropsValues.getUserId()
+			).put(
+				"firstName", "João"
+			).build(),
+			arguments[0]);
+		Assert.assertEquals(Collections.emptySet(), arguments[1]);
+		Assert.assertEquals("println \"Hello World\"", arguments[2]);
+
+		_objectActionLocalService.deleteObjectAction(objectAction);
 	}
 
 	@Test
@@ -385,6 +483,24 @@ public class ObjectActionLocalServiceTest {
 			objectAction.getParametersUnicodeProperties());
 	}
 
+	private Object _getAndSetFieldValue(
+		Class<?> clazz, String fieldName, String objectActionExecutorKey) {
+
+		return ReflectionTestUtil.getAndSetFieldValue(
+			_objectActionExecutorRegistry.getObjectActionExecutor(
+				objectActionExecutorKey),
+			fieldName,
+			ProxyUtil.newProxyInstance(
+				clazz.getClassLoader(), new Class<?>[] {clazz},
+				(proxy, method, arguments) -> {
+					_argumentsList.add(arguments);
+
+					return null;
+				}));
+	}
+
+	private static Props _props;
+
 	private final Queue<Object[]> _argumentsList = new LinkedList<>();
 
 	@Inject
@@ -405,6 +521,7 @@ public class ObjectActionLocalServiceTest {
 	@Inject
 	private ObjectEntryLocalService _objectEntryLocalService;
 
+	private GroovyScriptingExecutor _originalGroovyScriptingExecutor;
 	private Http _originalHttp;
 
 }

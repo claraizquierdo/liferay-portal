@@ -27,8 +27,6 @@ components:
                     type: string
                 description:
                     type: string
-                enable:
-                    type: boolean
                 from:
                     type: string
                 fromName:
@@ -50,7 +48,9 @@ components:
                         type: string
                     type: object
                 to:
-                    type: string
+                    additionalProperties:
+                        type: string
+                    type: object
             type: object
 info:
     description:

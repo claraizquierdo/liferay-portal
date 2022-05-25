@@ -19,12 +19,10 @@ import com.liferay.item.selector.ItemSelector;
 import com.liferay.object.field.business.type.ObjectFieldBusinessTypeServicesTracker;
 import com.liferay.object.scope.ObjectScopeProviderRegistry;
 import com.liferay.object.service.ObjectDefinitionLocalService;
-import com.liferay.object.service.ObjectDefinitionService;
 import com.liferay.object.service.ObjectEntryService;
 import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectLayoutLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
-import com.liferay.object.service.ObjectRelationshipService;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -42,10 +40,9 @@ public class ObjectEntryDisplayContextFactory {
 
 		return new ObjectEntryDisplayContext(
 			_ddmFormRenderer, httpServletRequest, _itemSelector,
-			_objectDefinitionLocalService, _objectDefinitionService,
-			_objectEntryService, _objectFieldBusinessTypeServicesTracker,
-			_objectFieldLocalService, _objectLayoutLocalService,
-			_objectRelationshipLocalService, _objectRelationshipService,
+			_objectDefinitionLocalService, _objectEntryService,
+			_objectFieldBusinessTypeServicesTracker, _objectFieldLocalService,
+			_objectLayoutLocalService, _objectRelationshipLocalService,
 			_objectScopeProviderRegistry, readOnly);
 	}
 
@@ -57,9 +54,6 @@ public class ObjectEntryDisplayContextFactory {
 
 	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
-
-	@Reference
-	private ObjectDefinitionService _objectDefinitionService;
 
 	@Reference
 	private ObjectEntryService _objectEntryService;
@@ -76,9 +70,6 @@ public class ObjectEntryDisplayContextFactory {
 
 	@Reference
 	private ObjectRelationshipLocalService _objectRelationshipLocalService;
-
-	@Reference
-	private ObjectRelationshipService _objectRelationshipService;
 
 	@Reference
 	private ObjectScopeProviderRegistry _objectScopeProviderRegistry;

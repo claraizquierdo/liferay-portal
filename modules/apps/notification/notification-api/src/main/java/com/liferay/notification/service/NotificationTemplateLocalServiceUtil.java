@@ -47,14 +47,15 @@ public class NotificationTemplateLocalServiceUtil {
 	 */
 	public static NotificationTemplate addNotificationTemplate(
 			long userId, String bcc, Map<java.util.Locale, String> bodyMap,
-			String cc, String description, boolean enabled, String from,
+			String cc, String description, String from,
 			Map<java.util.Locale, String> fromNameMap, String name,
-			Map<java.util.Locale, String> subjectMap, String to)
+			Map<java.util.Locale, String> subjectMap,
+			Map<java.util.Locale, String> toMap)
 		throws PortalException {
 
 		return getService().addNotificationTemplate(
-			userId, bcc, bodyMap, cc, description, enabled, from, fromNameMap,
-			name, subjectMap, to);
+			userId, bcc, bodyMap, cc, description, from, fromNameMap, name,
+			subjectMap, toMap);
 	}
 
 	/**
@@ -346,14 +347,15 @@ public class NotificationTemplateLocalServiceUtil {
 	public static NotificationTemplate updateNotificationTemplate(
 			long notificationTemplateId, String bcc,
 			Map<java.util.Locale, String> bodyMap, String cc,
-			String description, boolean enabled, String from,
+			String description, String from,
 			Map<java.util.Locale, String> fromNameMap, String name,
-			Map<java.util.Locale, String> subjectMap, String to)
+			Map<java.util.Locale, String> subjectMap,
+			Map<java.util.Locale, String> toMap)
 		throws PortalException {
 
 		return getService().updateNotificationTemplate(
-			notificationTemplateId, bcc, bodyMap, cc, description, enabled,
-			from, fromNameMap, name, subjectMap, to);
+			notificationTemplateId, bcc, bodyMap, cc, description, from,
+			fromNameMap, name, subjectMap, toMap);
 	}
 
 	/**

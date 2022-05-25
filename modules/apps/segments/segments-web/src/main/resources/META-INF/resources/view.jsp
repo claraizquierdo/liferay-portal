@@ -41,6 +41,16 @@ request.setAttribute("view.jsp-eventName", eventName);
 	sortingURL="<%= segmentsDisplayContext.getSortingURL() %>"
 />
 
+<c:if test="<%= !segmentsDisplayContext.isSegmentationEnabled(themeDisplay.getCompanyId()) %>">
+	<clay:stripe
+		displayType="warning"
+	>
+		<strong class="lead"><%= LanguageUtil.get(request, "segmentation-is-disabled") %></strong>
+
+		<span><%= LanguageUtil.get(request, "to-enable-segmentation-go-to-system-settings-segments-segments-service") %></span>
+	</clay:stripe>
+</c:if>
+
 <portlet:actionURL name="/segments/delete_segments_entry" var="deleteSegmentsEntryURL">
 	<portlet:param name="redirect" value="<%= currentURL %>" />
 </portlet:actionURL>

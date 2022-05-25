@@ -259,34 +259,6 @@ public class NotificationTemplate implements Serializable {
 	protected String description;
 
 	@Schema
-	public Boolean getEnable() {
-		return enable;
-	}
-
-	public void setEnable(Boolean enable) {
-		this.enable = enable;
-	}
-
-	@JsonIgnore
-	public void setEnable(
-		UnsafeSupplier<Boolean, Exception> enableUnsafeSupplier) {
-
-		try {
-			enable = enableUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Boolean enable;
-
-	@Schema
 	public String getFrom() {
 		return from;
 	}
@@ -453,16 +425,19 @@ public class NotificationTemplate implements Serializable {
 	protected Map<String, String> subject;
 
 	@Schema
-	public String getTo() {
+	@Valid
+	public Map<String, String> getTo() {
 		return to;
 	}
 
-	public void setTo(String to) {
+	public void setTo(Map<String, String> to) {
 		this.to = to;
 	}
 
 	@JsonIgnore
-	public void setTo(UnsafeSupplier<String, Exception> toUnsafeSupplier) {
+	public void setTo(
+		UnsafeSupplier<Map<String, String>, Exception> toUnsafeSupplier) {
+
 		try {
 			to = toUnsafeSupplier.get();
 		}
@@ -476,7 +451,7 @@ public class NotificationTemplate implements Serializable {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String to;
+	protected Map<String, String> to;
 
 	@Override
 	public boolean equals(Object object) {
@@ -599,16 +574,6 @@ public class NotificationTemplate implements Serializable {
 			sb.append("\"");
 		}
 
-		if (enable != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"enable\": ");
-
-			sb.append(enable);
-		}
-
 		if (from != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -684,11 +649,7 @@ public class NotificationTemplate implements Serializable {
 
 			sb.append("\"to\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(to));
-
-			sb.append("\"");
+			sb.append(_toJSON(to));
 		}
 
 		sb.append("}");

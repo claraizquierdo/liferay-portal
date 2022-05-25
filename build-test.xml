@@ -229,6 +229,8 @@ module.framework.properties.osgi.console=11312</echo>
 	</macrodef>
 
 	<macrodef name="deploy-osgi-modules">
+		<attribute default="" name="java.jdk.type" />
+		<attribute default="" name="java.jdk.version" />
 		<attribute name="osgi.modules" />
 
 		<sequential>
@@ -265,6 +267,98 @@ module.framework.properties.osgi.console=11312</echo>
 				</dirset>
 			</pathconvert>
 
+			<local name="gradlew.suffix" />
+
+			<if>
+				<os family="unix" />
+				<then>
+					<property name="gradlew.suffix" value="" />
+
+					<chmod
+						file="${project.dir}/gradlew${gradlew.suffix}"
+						perm="a+x"
+					/>
+				</then>
+				<else>
+					<property name="gradlew.suffix" value=".bat" />
+				</else>
+			</if>
+
+			<local name="java.jdk.home" />
+
+			<if>
+				<and>
+					<not>
+						<equals arg1="@{java.jdk.type}" arg2="" />
+					</not>
+					<not>
+						<equals arg1="@{java.jdk.version}" arg2="" />
+					</not>
+				</and>
+				<then>
+					<get-java-jdk-home
+						type="@{java.jdk.type}"
+						version="@{java.jdk.version}"
+					/>
+				</then>
+				<else>
+					<condition property="java.jdk.home" value="${env.JAVA_HOME}">
+						<not>
+							<isset property="java.jdk.home" />
+						</not>
+					</condition>
+				</else>
+			</if>
+
+			<local name="java.jdk.opts" />
+
+			<if>
+				<and>
+					<not>
+						<equals arg1="@{java.jdk.type}" arg2="" />
+					</not>
+					<not>
+						<equals arg1="@{java.jdk.version}" arg2="" />
+					</not>
+				</and>
+				<then>
+					<get-java-jdk-opts
+						type="@{java.jdk.type}"
+						version="@{java.jdk.version}"
+					/>
+				</then>
+				<else>
+					<condition else="${env.JAVA_OPTS}" property="java.jdk.opts" value="${env.ANT_OPTS}">
+						<and>
+							<isset property="env.ANT_OPTS" />
+							<isset property="env.JENKINS_HOME" />
+							<not>
+								<os family="windows" />
+							</not>
+						</and>
+					</condition>
+				</else>
+			</if>
+
+			<local name="path" />
+
+			<propertyregex
+				global="true"
+				input="${env.PATH}"
+				property="path"
+				regexp="${env.JAVA_HOME}"
+				replace="${java.jdk.home}"
+			/>
+
+			<echo></echo>
+			<echo>Build OSGi Modules: @{osgi.modules}</echo>
+
+			<execute>
+				${java.jdk.home}/bin/java -version
+			</execute>
+
+			<echo></echo>
+
 			<for list="${osgi.modules.paths}" parallel="true" param="osgi.module.path">
 				<sequential>
 					<local name="module.base.dir" />
@@ -272,23 +366,59 @@ module.framework.properties.osgi.console=11312</echo>
 
 					<dirname file="@{osgi.module.path}" property="module.base.dir" />
 
-					<move
-						failonerror="false"
-						file="${module.base.dir}/settings.gradle"
-						tofile="${module.base.dir}/settings.gradle.temp"
-						verbose="true"
-					/>
+					<tstamp>
+						<format pattern="yyyyMMddkkmmssSSS" property="tstamp.value" />
+					</tstamp>
 
-					<gradle-execute dir="@{osgi.module.path}" forcedcacheenabled="false" task="deploy">
-						<arg value="clean" />
-						<arg value="-Pnodejs.node.env=development" />
-					</gradle-execute>
+					<trycatch>
+						<try>
+							<move
+								failonerror="false"
+								file="${module.base.dir}/settings.gradle"
+								tofile="${module.base.dir}/settings.gradle.temp"
+								verbose="true"
+							/>
 
-					<move
-						failonerror="false"
-						file="${module.base.dir}/settings.gradle.temp"
-						tofile="${module.base.dir}/settings.gradle"
-					/>
+							<echo file="@{osgi.module.path}/${tstamp.value}.sh">
+								export PATH=${path}
+								export JAVA_HOME=${java.jdk.home}
+								export JAVA_OPTS='${java.jdk.opts}'
+
+								${project.dir}/gradlew${gradlew.suffix} \
+									\
+									-Pnodejs.node.env=development \
+									\
+									--max-workers=4 \
+									--profile \
+									--project-cache-dir=${project.dir}/.gradle \
+									--refresh-dependencies \
+									--stacktrace \
+									\
+									-Dapp.server.parent.dir=${app.server.parent.dir} \
+									-Dforced.cache.enabled=false \
+									-Dliferay.home=${liferay.home} \
+									-Dorg.gradle.internal.http.connectionTimeout=120000 \
+									-Dorg.gradle.internal.http.socketTimeout=120000 \
+									-Dorg.gradle.jvmargs='${java.jdk.opts}' \
+									\
+									clean \
+									deploy
+							</echo>
+
+							<exec dir="@{osgi.module.path}" executable="/bin/sh">
+								<arg line="${tstamp.value}.sh" />
+							</exec>
+						</try>
+						<finally>
+							<move
+								failonerror="false"
+								file="${module.base.dir}/settings.gradle.temp"
+								tofile="${module.base.dir}/settings.gradle"
+							/>
+
+							<delete failonerror="false" file="@{osgi.module.path}/${tstamp.value}.sh" />
+						</finally>
+					</trycatch>
 				</sequential>
 			</for>
 		</sequential>
@@ -828,6 +958,31 @@ jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_T
 					<var name="java.jdk.home" unset="true" />
 
 					<property name="java.jdk.home" value="${java.home}" />
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="get-java-jdk-opts">
+		<attribute default="${java.jdk.architecture}" name="architecture" />
+		<attribute default="oracle" name="type" />
+		<attribute default="${ant.java.version}" name="version" />
+
+		<sequential>
+			<var name="java.jdk.opts" unset="true" />
+
+			<propertycopy from="java.jdk.opts[@{version}][@{architecture}][@{type}]" property="java.jdk.opts" silent="true" />
+
+			<property name="java.jdk.opts" value="${java.home}" />
+
+			<if>
+				<not>
+					<available file="${java.jdk.opts}" />
+				</not>
+				<then>
+					<var name="java.jdk.opts" unset="true" />
+
+					<property name="java.jdk.opts" value="${java.home}" />
 				</then>
 			</if>
 		</sequential>
@@ -1857,7 +2012,6 @@ war.path=${app.server.portal.dir}/</echo>
 
 					<gradle-execute failonerror="@{failonerror}" gradlejvmargs="${poshi.gradle.jvm.args}" stacktrace="false" task="@{task}">
 						<arg value="--build-file=portal-web/build-test.gradle" />
-						<arg value="-PposhiRunnerExtProperties=${test.ext.properties.file}" />
 						<arg value="-Ptmp.maven.repository.dir=../.m2-tmp" />
 						<env key="ANT_OPTS" value="${poshi.java.jdk.opts}" />
 						<env key="JAVA_HOME" path="${java.jdk.home}" />
@@ -1866,7 +2020,6 @@ war.path=${app.server.portal.dir}/</echo>
 				<else>
 					<gradle-execute failonerror="@{failonerror}" stacktrace="false" task="@{task}">
 						<arg value="--build-file=portal-web/build-test.gradle" />
-						<arg value="-PposhiRunnerExtProperties=${test.ext.properties.file}" />
 						<arg value="-Ptmp.maven.repository.dir=../.m2-tmp" />
 					</gradle-execute>
 				</else>
@@ -9439,6 +9592,7 @@ virtualHostname="localhost"
 			</not>
 			<then>
 				<get-testcase-property property.name="osgi.modules.includes" />
+				<get-testcase-property property.name="osgi.modules.includes.jdk11" />
 			</then>
 		</if>
 
@@ -9446,6 +9600,17 @@ virtualHostname="localhost"
 			<isset property="osgi.modules.includes" />
 			<then>
 				<deploy-osgi-modules osgi.modules="${osgi.modules.includes}" />
+			</then>
+		</if>
+
+		<if>
+			<isset property="osgi.modules.includes.jdk11" />
+			<then>
+				<deploy-osgi-modules
+					java.jdk.type="oracle"
+					java.jdk.version="11"
+					osgi.modules="${osgi.modules.includes.jdk11}"
+				/>
 			</then>
 		</if>
 	</target>
@@ -14267,84 +14432,84 @@ module.framework.properties.blacklist.portal.profile.names=${blacklist.portal.pr
 			</not>
 			<then>
 				<antcall target="start-app-server-preserve-liferay-home" />
-			</then>
-		</if>
 
-		<get-testcase-property property.name="app.server.bundles.size" />
+				<get-testcase-property property.name="app.server.bundles.size" />
 
-		<if>
-			<isset property="app.server.bundles.size" />
-			<then>
-				<var name="app.server.bundle.index" value="1" />
+				<if>
+					<isset property="app.server.bundles.size" />
+					<then>
+						<var name="app.server.bundle.index" value="1" />
 
-				<get-testcase-property property.name="skip.start.app.server.index" />
+						<get-testcase-property property.name="skip.start.app.server.index" />
 
-				<antelope:repeat count="${app.server.bundles.size}">
-					<if>
-						<not>
-							<contains string="${skip.start.app.server.index}" substring="${app.server.bundle.index}" />
-						</not>
-						<then>
-							<start-app-server
-								app.server.bundle.index="${app.server.bundle.index}"
+						<antelope:repeat count="${app.server.bundles.size}">
+							<if>
+								<not>
+									<contains string="${skip.start.app.server.index}" substring="${app.server.bundle.index}" />
+								</not>
+								<then>
+									<start-app-server
+										app.server.bundle.index="${app.server.bundle.index}"
+									/>
+								</then>
+							</if>
+
+							<math
+								datatype="int"
+								operand1="${app.server.bundle.index}"
+								operand2="1"
+								operation="+"
+								result="app.server.bundle.index"
 							/>
-						</then>
-					</if>
+						</antelope:repeat>
 
-					<math
-						datatype="int"
-						operand1="${app.server.bundle.index}"
-						operand2="1"
-						operation="+"
-						result="app.server.bundle.index"
-					/>
-				</antelope:repeat>
+						<var name="app.server.bundle.index" unset="true" />
+					</then>
+				</if>
 
-				<var name="app.server.bundle.index" unset="true" />
-			</then>
-		</if>
-
-		<waitfor maxwait="150" maxwaitunit="second">
-			<available file="${liferay.home}/logs" type="dir" />
-		</waitfor>
-
-		<antcall target="wait-for-plugins-deployment" />
-
-		<if>
-			<available file="${liferay.home}/tmp/${theme.file.name}" />
-			<then>
-				<move
-					todir="${liferay.home}/deploy"
-				>
-					<fileset
-						dir="${liferay.home}/tmp"
-						includes="${theme.file.name}"
-					/>
-				</move>
-
-				<delete dir="${liferay.home}/tmp" failonerror="false" />
-
-				<waitfor checkevery="5" maxwait="300" maxwaitunit="second" timeoutproperty="theme.not.deployed">
-					<available file="${liferay.home}/osgi/war/${theme.file.name}" />
+				<waitfor maxwait="150" maxwaitunit="second">
+					<available file="${liferay.home}/logs" type="dir" />
 				</waitfor>
 
-				<fail if="theme.not.deployed" message="${theme.file.name} has failed to deploy." />
-			</then>
-			<elseif>
-				<available file="${liferay.home}/tmp" type="dir" />
-				<then>
-					<move
-						todir="${liferay.home}/osgi/marketplace"
-					>
-						<fileset
-							dir="${liferay.home}/tmp"
-							includes="*Theme*.lpkg"
-						/>
-					</move>
+				<antcall target="wait-for-plugins-deployment" />
 
-					<delete dir="${liferay.home}/tmp" failonerror="false" />
-				</then>
-			</elseif>
+				<if>
+					<available file="${liferay.home}/tmp/${theme.file.name}" />
+					<then>
+						<move
+							todir="${liferay.home}/deploy"
+						>
+							<fileset
+								dir="${liferay.home}/tmp"
+								includes="${theme.file.name}"
+							/>
+						</move>
+
+						<delete dir="${liferay.home}/tmp" failonerror="false" />
+
+						<waitfor checkevery="5" maxwait="300" maxwaitunit="second" timeoutproperty="theme.not.deployed">
+							<available file="${liferay.home}/osgi/war/${theme.file.name}" />
+						</waitfor>
+
+						<fail if="theme.not.deployed" message="${theme.file.name} has failed to deploy." />
+					</then>
+					<elseif>
+						<available file="${liferay.home}/tmp" type="dir" />
+						<then>
+							<move
+								todir="${liferay.home}/osgi/marketplace"
+							>
+								<fileset
+									dir="${liferay.home}/tmp"
+									includes="*Theme*.lpkg"
+								/>
+							</move>
+
+							<delete dir="${liferay.home}/tmp" failonerror="false" />
+						</then>
+					</elseif>
+				</if>
+			</then>
 		</if>
 
 		<get-testcase-property property.name="analytics.cloud.enabled" />

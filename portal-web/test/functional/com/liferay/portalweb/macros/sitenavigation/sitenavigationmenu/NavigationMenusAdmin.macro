@@ -9,8 +9,10 @@ definition {
 
 		Portlet.expandTree();
 
-		for (var pageName : list "${pageNames}") {
-			Portlet.selectTreeNode(nodeName = "${pageName}");
+		for (var pageName : list "${pageNameList}") {
+			Check.checkNotVisible(
+				key_nodeName = "${pageName}",
+				locator1 = "Treeview#NODE_CHECKBOX");
 		}
 	}
 
@@ -89,7 +91,7 @@ definition {
 
 		if ("${item}" == "Page") {
 			NavigationMenusAdmin._addItemPage(
-				pageNames = "${pageNames}",
+				pageNameList = "${pageNameList}",
 				privacy = "${privacy}");
 
 			Button.click(button = "Select");
@@ -184,30 +186,6 @@ definition {
 		PortletEntry.inputName(name = "${menuName}");
 
 		Modal.save();
-	}
-
-	macro addPage {
-		WaitForLiferayEvent.initializeLiferayEventLog();
-
-		Click(locator1 = "Button#PLUS");
-
-		MenuItem.click(menuItem = "Page");
-
-		Pause(locator1 = "1000");
-
-		IFrame.selectConfigurationFrame();
-
-		Portlet.expandTree();
-
-		for (var pageName : list "${pageNames}") {
-			Portlet.selectTreeNode(nodeName = "${pageName}");
-		}
-
-		Button.click(button = "Select");
-
-		Alert.viewSuccessMessage();
-
-		IFrame.selectTopFrame();
 	}
 
 	macro addTranslation {
@@ -317,7 +295,11 @@ definition {
 		NavigationMenusAdmin.openItemSidebar(itemName = "${itemName}");
 
 		if ("${item}" == "Page") {
-			if (isSet(pageNames)) {
+			if (isSet(customName)) {
+				NavigationMenusAdmin._editItemPage(name = "${customName}");
+			}
+
+			if (isSet(pageName)) {
 				Click(locator1 = "Button#CHOOSE");
 
 				Pause(locator1 = "1000");
@@ -326,18 +308,13 @@ definition {
 
 				Portlet.expandTree();
 
-				for (var pageName : list "${pageNames}") {
-					Portlet.selectTreeNode(nodeName = "${pageName}");
-				}
+				Click(
+					key_nodeName = "${pageName}",
+					locator1 = "Treeview#NODE_UNSELECTED");
 
 				SelectFrameTop();
 
 				Button.click(button = "Select");
-
-				IFrame.selectTopFrame();
-			}
-			else {
-				NavigationMenusAdmin._editItemPage(name = "${name}");
 			}
 		}
 		else if ("${item}" == "Submenu") {

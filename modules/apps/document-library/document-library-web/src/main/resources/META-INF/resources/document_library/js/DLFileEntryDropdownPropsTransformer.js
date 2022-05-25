@@ -12,7 +12,12 @@
  * details.
  */
 
-import {addParams, navigate, openModal} from 'frontend-js-web';
+import {
+	addParams,
+	navigate,
+	openModal,
+	openSelectionModal,
+} from 'frontend-js-web';
 
 const ACTIONS = {
 	checkin({checkinURL}, portletNamespace) {
@@ -50,7 +55,46 @@ const ACTIONS = {
 		});
 	},
 
+	compareTo({
+		compareVersionURL,
+		dialogTitle,
+		jsNamespace,
+		namespace,
+		selectFileVersionURL,
+	}) {
+		openSelectionModal({
+			id: `${jsNamespace}compareFileVersions`,
+			onSelect(selectedItem) {
+				let uri = compareVersionURL;
+
+				uri = addParams(
+					`${namespace}sourceFileVersionId=${selectedItem.sourceversion}`,
+					uri
+				);
+				uri = addParams(
+					`${namespace}targetFileVersionId=${selectedItem.targetversion}`,
+					uri
+				);
+
+				navigate(uri);
+			},
+			selectEventName: `${namespace}selectFileVersionFm`,
+			title: dialogTitle,
+			url: selectFileVersionURL,
+		});
+	},
+
 	delete({deleteURL}) {
+		if (
+			confirm(
+				Liferay.Language.get('are-you-sure-you-want-to-delete-this')
+			)
+		) {
+			submitForm(document.hrefFm, deleteURL);
+		}
+	},
+
+	deleteVersion({deleteURL}) {
 		if (
 			confirm(
 				Liferay.Language.get('are-you-sure-you-want-to-delete-this')
