@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,23 +11,30 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/init.jsp" %>
+import {render} from '@liferay/frontend-js-react-web';
 
-<liferay-frontend:component
-	componentId='<%= liferayPortletResponse.getNamespace() + "addIconAction" %>'
-	context='<%=
-		HashMapBuilder.<String, Object>put(
-			"url",
-			PortletURLBuilder.create(
-				PortalUtil.getControlPanelPortletURL(liferayPortletRequest, LayoutPageTemplateAdminPortletKeys.LAYOUT_PAGE_TEMPLATES, PortletRequest.RENDER_PHASE)
-			).setMVCPath(
-				"/view_import.jsp"
-			).setWindowState(
-				LiferayWindowState.POP_UP
-			).buildString()
-		).build()
-	%>'
-	module="js/addIconAction"
-/>
+import ImportModal from './modal/ImportModal';
+
+export default function ({namespace, url}) {
+	Liferay.Util.setPortletConfigurationIconAction(`${namespace}import`, () => {
+		if (Liferay.FeatureFlags['LPS-174939']) {
+			render(
+				ImportModal,
+				{
+					namespace,
+				},
+				document.createElement('div')
+			);
+		}
+		else {
+			Liferay.Util.openModal({
+				onClose() {
+					window.location.reload();
+				},
+				title: Liferay.Language.get('import'),
+				url,
+			});
+		}
+	});
+}
