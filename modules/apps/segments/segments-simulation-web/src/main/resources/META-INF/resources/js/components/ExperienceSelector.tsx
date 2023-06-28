@@ -19,6 +19,23 @@ import Label from '@clayui/label';
 import Layout from '@clayui/layout';
 import React, {useState} from 'react';
 
+interface segmentExperience {
+	segmentsEntryName: string;
+	segmentsExperienceActive: boolean;
+	segmentsExperienceId: string;
+	segmentsExperienceName: string;
+	segmentsExperienceStatusLabel: string;
+}
+
+interface Props {
+	maximumDropdownEntries: number;
+	namespace: string;
+	onMoreSegmentExperiencesButtonClick: () => void;
+	onSelectSegmentExperience: React.Dispatch<segmentExperience>;
+	segmentsExperiences: segmentExperience[];
+	selectedSegmentsExperience: segmentExperience;
+}
+
 function ExperienceSelector({
 	maximumDropdownEntries,
 	namespace,
@@ -26,13 +43,13 @@ function ExperienceSelector({
 	onSelectSegmentExperience,
 	segmentsExperiences,
 	selectedSegmentsExperience,
-}) {
+}: Props) {
 	const [
 		segmentExperienceSelectorActive,
 		setSegmentExperienceSelectorActive,
 	] = useState(false);
 
-	const segmentExperiencesShortList =
+	const segmentExperiencesShortList: segmentExperience[] =
 		segmentsExperiences.length > maximumDropdownEntries
 			? segmentsExperiences.slice(0, maximumDropdownEntries)
 			: segmentsExperiences;
@@ -166,7 +183,8 @@ function ExperienceSelector({
 								maximumDropdownEntries && (
 								<ClayDropDown.Section>
 									<ClayButton
-										displayType="secondary w-100"
+										className="w-100"
+										displayType="secondary"
 										onClick={() => {
 											setSegmentExperienceSelectorActive(
 												false
