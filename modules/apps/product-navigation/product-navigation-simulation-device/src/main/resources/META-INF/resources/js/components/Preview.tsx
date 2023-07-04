@@ -12,6 +12,7 @@
  * details.
  */
 
+import ClayAlert from '@clayui/alert';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useEffect, useState} from 'react';
@@ -25,6 +26,9 @@ interface IPreviewProps {
 
 export default function Preview({activeSize, previewRef}: IPreviewProps) {
 	const [visible, setVisible] = useState<boolean>(true);
+	const [segmentMessage, setSegmentMessage] = useState<string>(
+		'Showing content for the segment “segment”.'
+	);
 
 	useEffect(() => {
 		const hideIframe = () => setVisible(false);
@@ -44,7 +48,17 @@ export default function Preview({activeSize, previewRef}: IPreviewProps) {
 	}
 
 	return (
-		<div className="align-items-center d-flex justify-content-center simulation-preview">
+		<div className="align-items-center d-flex flex-column simulation-preview">
+			{Liferay.FeatureFlags['LPS-186155'] && (
+				<ClayAlert
+					className="c-mb-3 c-mt-3 simulation-preview-message"
+					displayType="info"
+					title="Info"
+				>
+					{segmentMessage}
+				</ClayAlert>
+			)}
+
 			<div
 				className={classNames(
 					'device position-absolute',
