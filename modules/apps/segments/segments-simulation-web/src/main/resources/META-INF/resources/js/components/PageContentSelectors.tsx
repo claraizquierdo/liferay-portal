@@ -47,6 +47,8 @@ const PREVIEW_OPTIONS = [
 	},
 ];
 
+const SEGMENT_SIMULATION_EVENT = "SegmenentSimulation:changeSegment";
+
 const MAXIMUM_DROPDOWN_ENTRIES = 8;
 
 function PageContentSelectors({
@@ -84,6 +86,13 @@ function PageContentSelectors({
 	}, [deactivateSimulationURL]);
 
 	const simulateSegmentsEntries = useCallback(() => {
+		Liferay.fire(SEGMENT_SIMULATION_EVENT, {
+			message: sub(Liferay.Language.get('showing-content-for-the-x-x'), [
+				Liferay.Language.get('segment'),
+				selectedSegmentEntry.name,
+		  ]),
+		});
+
 		fetch(simulateSegmentsEntriesURL, {
 			body: new FormData(formRef.current ? formRef.current : undefined),
 			method: 'POST',
@@ -94,18 +103,25 @@ function PageContentSelectors({
 				iframe.contentWindow.location.reload();
 			}
 		});
-	}, [simulateSegmentsEntriesURL]);
+	}, [selectedSegmentEntry, simulateSegmentsEntriesURL]);
 
 	const simulateSegmentsExperiment = useCallback((experience) => {
 		const iframe = document.querySelector('iframe');
 
 		if (iframe?.contentWindow) {
+			Liferay.fire(SEGMENT_SIMULATION_EVENT, {
+				message: sub(Liferay.Language.get('showing-content-for-the-x-x'), [
+					Liferay.Language.get('experience'),
+					selectedSegmentsExperience.segmentsExperienceName,
+			  ]),
+			});
+
 			const url = new URL(iframe.contentWindow.location.href);
 
 			url.searchParams.set('segmentsExperienceId', experience);
 			iframe.src = url.toString();
 		}
-	}, []);
+	}, [selectedSegmentsExperience]);
 
 	const handleMoreSegmentEntriesButtonClick = () => {
 		openSelectionModal({
