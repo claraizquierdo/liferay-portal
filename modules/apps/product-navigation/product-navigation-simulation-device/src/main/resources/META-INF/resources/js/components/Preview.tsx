@@ -24,18 +24,18 @@ interface IPreviewProps {
 	previewRef: React.RefObject<HTMLDivElement>;
 }
 
-const SEGMENT_SIMULATION_EVENT = "SegmenentSimulation:changeSegment";
+const SEGMENT_SIMULATION_EVENT = 'SegmenentSimulation:changeSegment';
 
 export default function Preview({activeSize, previewRef}: IPreviewProps) {
 	const [visible, setVisible] = useState<boolean>(true);
-	const [segmentMessage, setSegmentMessage] = useState<string | null>(
-		null
-	);
+	const [segmentMessage, setSegmentMessage] = useState<string | null>(null);
 
 	useEffect(() => {
 		const hideIframe = () => setVisible(false);
 		const showIframe = () => setVisible(true);
-		const handleSegmentChange = ({message}: {message: string}) => {setSegmentMessage(message);};
+		const handleSegmentChange = ({message}: {message: string}) => {
+			setSegmentMessage(message);
+		};
 
 		Liferay.on('SimulationMenu:closeSimulationPanel', hideIframe);
 		Liferay.on('SimulationMenu:openSimulationPanel', showIframe);
@@ -68,7 +68,12 @@ export default function Preview({activeSize, previewRef}: IPreviewProps) {
 				className={classNames(
 					'device position-absolute',
 					activeSize.cssClass,
-					{resizable: activeSize.id === SIZES.custom.id}
+					{
+						'device--with-alert':
+							Liferay.FeatureFlags['LPS-186155'] &&
+							segmentMessage,
+						'resizable': activeSize.id === SIZES.custom.id,
+					}
 				)}
 				ref={previewRef}
 				style={activeSize.screenSize}

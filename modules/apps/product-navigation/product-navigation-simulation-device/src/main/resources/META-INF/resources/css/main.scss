@@ -88,7 +88,10 @@ html#{$cadmin-selector} {
 
 			.device {
 				box-sizing: content-box;
-				top: 85px;
+
+				&--with-alert {
+					top: 85px;
+				}
 
 				&:after {
 					border-radius: 15px;
