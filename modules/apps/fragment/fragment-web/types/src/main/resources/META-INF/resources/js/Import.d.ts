@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,25 +11,12 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/init.jsp" %>
+/// <reference types="react" />
 
-<%
-portletDisplay.setShowBackIcon(true);
-portletDisplay.setURLBack(ParamUtil.getString(request, "backURL", String.valueOf(renderResponse.createRenderURL())));
-
-renderResponse.setTitle(LanguageUtil.get(request, "import"));
-%>
-
-
-<react:component
-	module="js/Import"
-	props='<%=
-		HashMapBuilder.<String, Object>put(
-			"importURL", "http://bleble.com"
-		).put(
-			"portletNamespace", "ble"
-		).build()
-	%>'
-/>
+interface Props {
+	importURL: string;
+	portletNamespace: string;
+}
+declare function Import({importURL, portletNamespace}: Props): JSX.Element;
+export default Import;
