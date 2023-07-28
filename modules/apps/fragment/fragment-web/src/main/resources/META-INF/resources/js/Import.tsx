@@ -4,13 +4,12 @@
  */
 
 import ClayButton from '@clayui/button';
-import ClayForm, {ClayCheckbox, ClayInput} from '@clayui/form';
-import ClayIcon from '@clayui/icon';
+import ClayForm, {ClayCheckbox} from '@clayui/form';
 import ClayLayout from '@clayui/layout';
 import ClayToolbar from '@clayui/toolbar';
 import classNames from 'classnames';
 import {fetch, navigate, openToast, sub} from 'frontend-js-web';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 
 import ImportResults, {ImportResultsData} from './ImportResults';
 
@@ -19,6 +18,8 @@ interface Props {
 	importURL: string;
 	portletNamespace: string;
 }
+
+const VALID_EXTENSIONS = '.zip';
 
 function Import({backURL, importURL, portletNamespace}: Props) {
 	const [error, setError] = useState<string | null>(null);
@@ -29,6 +30,8 @@ function Import({backURL, importURL, portletNamespace}: Props) {
 		importResults,
 		setImportResults,
 	] = useState<ImportResultsData | null>(null);
+
+    const inputFileRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
 	const validateFile = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (!event.target.files || event.target.files?.length === 0) {
@@ -186,21 +189,35 @@ function Import({backURL, importURL, portletNamespace}: Props) {
 						<ClayForm.Group
 							className={classNames({'has-error': error})}
 						>
-							<label htmlFor={`${portletNamespace}file`}>
-								{Liferay.Language.get('file')}
-
-								<ClayIcon
-									className="reference-mark"
-									symbol="asterisk"
-								/>
+							<label className="c-mb-2 d-block" htmlFor={`${portletNamespace}file`}>
+								{Liferay.Language.get('file-upload')}
 							</label>
 
-							<ClayInput
+							<input
+								accept={VALID_EXTENSIONS}
 								data-testid={`${portletNamespace}file`}
-								id={`${portletNamespace}file`}
+								hidden
+                                id={`${portletNamespace}file`}
+								multiple
+								name="file"
 								onChange={validateFile}
-								type="file"
+								ref={inputFileRef}
+                                type="file"
 							/>
+
+							<ClayButton.Group spaced>
+								<ClayButton
+									displayType="secondary"
+									onClick={() => {
+										inputFileRef.current.click();
+									}}
+									size="sm"
+								>
+									{file
+										? Liferay.Language.get('replace-files')
+										: Liferay.Language.get('select-files')}
+								</ClayButton>
+							</ClayButton.Group>
 
 							{error && (
 								<ClayForm.FeedbackGroup>
@@ -221,6 +238,8 @@ function Import({backURL, importURL, portletNamespace}: Props) {
 							)}
 							onChange={() => setOverwrite((val) => !val)}
 						/>
+
+                        <p className="c-mt-3 text-3 text-weight-semi-bold">{fileName}</p>
 					</ClayLayout.Sheet>
 				)}
 			</ClayLayout.ContainerFluid>
