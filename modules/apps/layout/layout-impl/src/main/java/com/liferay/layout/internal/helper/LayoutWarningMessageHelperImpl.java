@@ -94,6 +94,17 @@ public class LayoutWarningMessageHelperImpl
 			Constants.VIEW);
 
 		if (Objects.equals(mode, Constants.VIEW)) {
+			/*return JSONUtil.put("title", _language.get(httpServletRequest, "pagination-is-disabled")).put("subtitle",
+				_language.format(
+					httpServletRequest,
+					StringBundler.concat(
+						"this-setting-can-affect-page-",
+						"performance-severely-if-the-number-of-collection-items-",
+						"is-above-x.-we-strongly-recommend-using-pagination-",
+						"instead"),
+					PropsValues.SEARCH_CONTAINER_PAGE_MAX_DELTA))
+*/
+
 			return _language.format(
 				httpServletRequest,
 				StringBundler.concat(
