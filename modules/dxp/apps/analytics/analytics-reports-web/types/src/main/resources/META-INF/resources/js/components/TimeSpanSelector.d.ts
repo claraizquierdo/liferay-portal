@@ -6,14 +6,14 @@
 /// <reference types="react" />
 
 import {TimeSpan} from '../context/ChartStateContext';
-interface TimeSpanOption {
+export interface TimeSpanOption {
 	key: TimeSpan;
 	label: string;
 }
 interface Props {
 	disabledNextTimeSpan: boolean;
 	disabledPreviousPeriodButton: boolean;
-	timeSpanKey: TimeSpan;
+	timeSpanKey?: TimeSpan;
 	timeSpanOptions: TimeSpanOption[];
 }
 export default function TimeSpanSelector({
