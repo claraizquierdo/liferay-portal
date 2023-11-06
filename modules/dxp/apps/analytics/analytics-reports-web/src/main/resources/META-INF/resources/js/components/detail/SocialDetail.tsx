@@ -6,8 +6,6 @@
 import ClayList from '@clayui/list';
 import ClayLoadingIndicator from '@clayui/loading-indicator';
 import className from 'classnames';
-import {sub} from 'frontend-js-web';
-import PropTypes from 'prop-types';
 import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
@@ -23,8 +21,9 @@ import {
 } from '../../context/StoreContext';
 import {generateDateFormatters as dateFormat} from '../../utils/dateFormat';
 import {numberFormat} from '../../utils/numberFormat';
-import TimeSpanSelector from '../TimeSpanSelector';
+import TimeSpanSelector, {TimeSpanOption} from '../TimeSpanSelector';
 import TotalCount from '../TotalCount';
+import {TrafficSource} from './types';
 
 const SOCIAL_MEDIA_COLORS = {
 	facebook: '#4B9BFF',
@@ -36,7 +35,31 @@ const SOCIAL_MEDIA_COLORS = {
 	tiktok: '#FF73C3',
 	twitter: '#5FC8FF',
 	youtube: '#FF5F5F',
-};
+} as const;
+const DEFAULT_LANGUAGE_TAG = 'en-US';
+
+interface Props {
+	currentPage: {
+		data: {
+			referringSocialMedia: Array<{
+				name: keyof typeof SOCIAL_MEDIA_COLORS;
+				title: string;
+				trafficAmount: number;
+			}>;
+			title: string;
+		};
+		view: string;
+	};
+	handleDetailPeriodChange: (
+		trafficSources: Array<TrafficSource>,
+		trafficSourceName: string,
+		sameTrafficSource: boolean
+	) => void;
+	timeSpanOptions: Array<TimeSpanOption>;
+	trafficShareDataProvider: () => Promise<string>;
+	trafficSourcesDataProvider: () => Promise<Array<TrafficSource>>;
+	trafficVolumeDataProvider: () => Promise<string>;
+}
 
 export default function SocialDetail({
 	currentPage,
@@ -45,18 +68,26 @@ export default function SocialDetail({
 	trafficShareDataProvider,
 	trafficSourcesDataProvider,
 	trafficVolumeDataProvider,
-}) {
+}: Props) {
 	const {languageTag} = useContext(StoreStateContext);
 
 	const {referringSocialMedia} = currentPage.data;
 
-	const dateFormatters = useMemo(() => dateFormat(languageTag), [
-		languageTag,
-	]);
+	const dateFormatters = useMemo(
+		() => dateFormat(languageTag ? languageTag : DEFAULT_LANGUAGE_TAG),
+		[languageTag]
+	);
 
 	const {firstDate, lastDate} = useDateTitle();
 
-	const title = dateFormatters.formatChartTitle([firstDate, lastDate]);
+	const title = useMemo(() => {
+		if (firstDate && lastDate) {
+			return dateFormatters.formatChartTitle([firstDate, lastDate]);
+		}
+		else {
+			return '';
+		}
+	}, [dateFormatters, firstDate, lastDate]);
 
 	const dispatch = useContext(StoreDispatchContext);
 
@@ -70,11 +101,11 @@ export default function SocialDetail({
 
 	const isPreviousPeriodButtonDisabled = useIsPreviousPeriodButtonDisabled();
 
-	const keyToHexColor = (name) => {
+	const keyToHexColor = (name: keyof typeof SOCIAL_MEDIA_COLORS) => {
 		return SOCIAL_MEDIA_COLORS[name] ?? '#666666';
 	};
 
-	const keyToWidth = (index) => {
+	const keyToWidth = (index: number) => {
 		if (index === 0) {
 			return '100%';
 		}
@@ -85,7 +116,7 @@ export default function SocialDetail({
 		}%`;
 	};
 
-	const [highlighted, setHighlighted] = useState(null);
+	const [highlighted, setHighlighted] = useState<string | null>(null);
 
 	const firstUpdateRef = useRef(true);
 
@@ -96,7 +127,7 @@ export default function SocialDetail({
 		}
 	);
 
-	function handleLegendMouseEnter(name) {
+	function handleLegendMouseEnter(name: string) {
 		setHighlighted(name);
 	}
 
@@ -150,7 +181,7 @@ export default function SocialDetail({
 			{pieChartLoading && (
 				<ClayLoadingIndicator
 					className="chart-loading-indicator"
-					small
+					size="sm"
 				/>
 			)}
 
@@ -170,7 +201,7 @@ export default function SocialDetail({
 			<TotalCount
 				className="c-mb-2"
 				dataProvider={trafficVolumeDataProvider}
-				label={sub(Liferay.Language.get('traffic-volume'))}
+				label={Liferay.Language.get('traffic-volume')}
 				popoverHeader={Liferay.Language.get('traffic-volume')}
 				popoverMessage={Liferay.Language.get(
 					'traffic-volume-is-the-number-of-page-views-coming-from-one-channel'
@@ -181,7 +212,7 @@ export default function SocialDetail({
 			<TotalCount
 				className="c-mb-3"
 				dataProvider={trafficShareDataProvider}
-				label={sub(Liferay.Language.get('traffic-share'))}
+				label={Liferay.Language.get('traffic-share')}
 				percentage={true}
 				popoverHeader={Liferay.Language.get('traffic-share')}
 				popoverMessage={Liferay.Language.get(
@@ -207,71 +238,62 @@ export default function SocialDetail({
 						</ClayList.ItemTitle>
 					</ClayList.ItemField>
 				</ClayList.Item>
+				<>
+					{referringSocialMedia.map(
+						({name, title, trafficAmount}, index) => {
+							const listItemClasses = className({
+								dim: highlighted && name !== highlighted,
+							});
 
-				{referringSocialMedia.map(
-					({name, title, trafficAmount}, index) => {
-						const listItemClasses = className({
-							dim: highlighted && name !== highlighted,
-						});
-
-						return (
-							<ClayList.Item
-								className={listItemClasses}
-								flex
-								key={title}
-								onMouseOut={handleLegendMouseLeave}
-								onMouseOver={() => handleLegendMouseEnter(name)}
-							>
-								<ClayList.ItemField style={{width: '70px'}}>
-									<ClayList.ItemText>
-										<span className="c-mr-2 text-secondary">
-											{title}
-										</span>
-									</ClayList.ItemText>
-								</ClayList.ItemField>
-
-								<ClayList.ItemField
-									className="align-self-center"
-									expand
+							return (
+								<ClayList.Item
+									className={listItemClasses}
+									flex
+									key={title}
+									onMouseOut={handleLegendMouseLeave}
+									onMouseOver={() =>
+										handleLegendMouseEnter(name)
+									}
 								>
-									<div
-										style={{
-											backgroundColor: keyToHexColor(
-												name
-											),
-											height: '16px',
-											width: keyToWidth(index),
-										}}
-									/>
-								</ClayList.ItemField>
+									<ClayList.ItemField style={{width: '70px'}}>
+										<ClayList.ItemText>
+											<span className="c-mr-2 text-secondary">
+												{title}
+											</span>
+										</ClayList.ItemText>
+									</ClayList.ItemField>
 
-								<ClayList.ItemField className="align-self-center">
-									<span className="align-self-end c-ml-2 font-weight-semi-bold text-dark">
-										{numberFormat(
-											languageTag,
-											trafficAmount
-										)}
-									</span>
-								</ClayList.ItemField>
-							</ClayList.Item>
-						);
-					}
-				)}
+									<ClayList.ItemField
+										className="align-self-center"
+										expand
+									>
+										<div
+											style={{
+												backgroundColor: keyToHexColor(
+													name
+												),
+												height: '16px',
+												width: keyToWidth(index),
+											}}
+										/>
+									</ClayList.ItemField>
+
+									<ClayList.ItemField className="align-self-center">
+										<span className="align-self-end c-ml-2 font-weight-semi-bold text-dark">
+											{numberFormat(
+												languageTag
+													? languageTag
+													: DEFAULT_LANGUAGE_TAG,
+												trafficAmount
+											)}
+										</span>
+									</ClayList.ItemField>
+								</ClayList.Item>
+							);
+						}
+					)}
+				</>
 			</ClayList>
 		</div>
 	);
 }
-
-SocialDetail.propTypes = {
-	currentPage: PropTypes.object.isRequired,
-	handleDetailPeriodChange: PropTypes.func.isRequired,
-	timeSpanOptions: PropTypes.arrayOf(
-		PropTypes.shape({
-			key: PropTypes.string,
-			label: PropTypes.string,
-		})
-	).isRequired,
-	trafficShareDataProvider: PropTypes.func.isRequired,
-	trafficSourcesDataProvider: PropTypes.func.isRequired,
-	trafficVolumeDataProvider: PropTypes.func.isRequired,
-};
