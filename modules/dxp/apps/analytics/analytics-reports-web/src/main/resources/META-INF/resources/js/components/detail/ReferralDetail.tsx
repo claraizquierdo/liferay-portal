@@ -7,8 +7,6 @@ import ClayButton from '@clayui/button';
 import ClayList from '@clayui/list';
 import ClayLoadingIndicator from '@clayui/loading-indicator';
 import className from 'classnames';
-import {sub} from 'frontend-js-web';
-import PropTypes from 'prop-types';
 import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
@@ -25,10 +23,37 @@ import {
 import {generateDateFormatters as dateFormat} from '../../utils/dateFormat';
 import {numberFormat} from '../../utils/numberFormat';
 import Hint from '../Hint';
-import TimeSpanSelector from '../TimeSpanSelector';
+import TimeSpanSelector, {TimeSpanOption} from '../TimeSpanSelector';
 import TotalCount from '../TotalCount';
+import {TrafficSource} from './types';
 
 const ITEMS_TO_SHOW = 5;
+const DEFAULT_LANGUAGE_TAG = 'en-US';
+interface Props {
+	currentPage: {
+		data: {
+			referringDomains: Array<{
+				trafficAmount: number;
+				url: string;
+			}>;
+			referringPages: Array<{
+				trafficAmount: number;
+				url: string;
+			}>;
+			title: string;
+		};
+		view: string;
+	};
+	handleDetailPeriodChange: (
+		trafficSources: Array<TrafficSource>,
+		trafficSourceName: string,
+		sameTrafficSource: boolean
+	) => void;
+	timeSpanOptions: Array<TimeSpanOption>;
+	trafficShareDataProvider: () => Promise<string>;
+	trafficSourcesDataProvider: () => Promise<Array<TrafficSource>>;
+	trafficVolumeDataProvider: () => Promise<string>;
+}
 
 export default function ReferralDetail({
 	currentPage,
@@ -37,7 +62,7 @@ export default function ReferralDetail({
 	trafficShareDataProvider,
 	trafficSourcesDataProvider,
 	trafficVolumeDataProvider,
-}) {
+}: Props) {
 	const {languageTag} = useContext(StoreStateContext);
 
 	const [isReferringPagesExpanded, setIsReferringPagesExpanded] = useState(
@@ -51,14 +76,20 @@ export default function ReferralDetail({
 
 	const {referringDomains, referringPages} = currentPage.data;
 
-	const dateFormatters = useMemo(() => dateFormat(languageTag), [
-		languageTag,
-	]);
+	const dateFormatters = useMemo(
+		() => dateFormat(languageTag ? languageTag : DEFAULT_LANGUAGE_TAG),
+		[languageTag]
+	);
 
 	const {firstDate, lastDate} = useDateTitle();
 
 	const title = useMemo(() => {
-		return dateFormatters.formatChartTitle([firstDate, lastDate]);
+		if (firstDate && lastDate) {
+			return dateFormatters.formatChartTitle([firstDate, lastDate]);
+		}
+		else {
+			return '';
+		}
 	}, [dateFormatters, firstDate, lastDate]);
 
 	const dispatch = useContext(StoreDispatchContext);
@@ -80,6 +111,11 @@ export default function ReferralDetail({
 		{
 			'traffic-source-detail--loading': pieChartLoading,
 		}
+	);
+
+	const referingPagesToShow = referringPages.slice(
+		0,
+		isReferringPagesExpanded ? 10 : ITEMS_TO_SHOW
 	);
 
 	useEffect(() => {
@@ -128,7 +164,7 @@ export default function ReferralDetail({
 			{pieChartLoading && (
 				<ClayLoadingIndicator
 					className="chart-loading-indicator"
-					small
+					size="sm"
 				/>
 			)}
 
@@ -148,7 +184,7 @@ export default function ReferralDetail({
 			<TotalCount
 				className="c-mb-2"
 				dataProvider={trafficVolumeDataProvider}
-				label={sub(Liferay.Language.get('traffic-volume'))}
+				label={Liferay.Language.get('traffic-volume')}
 				popoverHeader={Liferay.Language.get('traffic-volume')}
 				popoverMessage={Liferay.Language.get(
 					'traffic-volume-is-the-number-of-page-views-coming-from-one-channel'
@@ -159,7 +195,7 @@ export default function ReferralDetail({
 			<TotalCount
 				className="c-mb-3"
 				dataProvider={trafficShareDataProvider}
-				label={sub(Liferay.Language.get('traffic-share'))}
+				label={Liferay.Language.get('traffic-share')}
 				percentage={true}
 				popoverHeader={Liferay.Language.get('traffic-share')}
 				popoverMessage={Liferay.Language.get(
@@ -195,40 +231,40 @@ export default function ReferralDetail({
 					</ClayList.ItemField>
 				</ClayList.Item>
 
-				{referringPages
-					.slice(0, isReferringPagesExpanded ? 10 : ITEMS_TO_SHOW)
-					.map(({trafficAmount, url}) => {
-						return (
-							<ClayList.Item flex key={url}>
-								<ClayList.ItemField expand>
-									<ClayList.ItemText>
-										<span
-											className="text-truncate-inline"
-											data-tooltip-align="top"
-											title={url}
+				<>
+					{referingPagesToShow.map(({trafficAmount, url}) => (
+						<ClayList.Item flex key={url}>
+							<ClayList.ItemField expand>
+								<ClayList.ItemText>
+									<span
+										className="text-truncate-inline"
+										data-tooltip-align="top"
+										title={url}
+									>
+										<a
+											className="c-mr-2 text-primary text-truncate text-truncate-reverse"
+											href={url}
+											target="_blank"
 										>
-											<a
-												className="c-mr-2 text-primary text-truncate text-truncate-reverse"
-												href={url}
-												target="_blank"
-											>
-												{url}
-											</a>
-										</span>
-									</ClayList.ItemText>
-								</ClayList.ItemField>
-
-								<ClayList.ItemField expand>
-									<span className="align-self-end font-weight-semi-bold text-dark">
-										{numberFormat(
-											languageTag,
-											trafficAmount
-										)}
+											{url}
+										</a>
 									</span>
-								</ClayList.ItemField>
-							</ClayList.Item>
-						);
-					})}
+								</ClayList.ItemText>
+							</ClayList.ItemField>
+
+							<ClayList.ItemField expand>
+								<span className="align-self-end font-weight-semi-bold text-dark">
+									{numberFormat(
+										languageTag
+											? languageTag
+											: DEFAULT_LANGUAGE_TAG,
+										trafficAmount
+									)}
+								</span>
+							</ClayList.ItemField>
+						</ClayList.Item>
+					))}
+				</>
 			</ClayList>
 
 			{referringPages.length > 5 && (
@@ -239,7 +275,7 @@ export default function ReferralDetail({
 					onClick={() =>
 						setIsReferringPagesExpanded(!isReferringPagesExpanded)
 					}
-					small
+					size="sm"
 				>
 					{isReferringPagesExpanded ? (
 						<span>{Liferay.Language.get('view-less')}</span>
@@ -276,41 +312,47 @@ export default function ReferralDetail({
 						</ClayList.ItemTitle>
 					</ClayList.ItemField>
 				</ClayList.Item>
-
-				{referringDomains
-					.slice(0, isReferringDomainsExpanded ? 10 : ITEMS_TO_SHOW)
-					.map(({trafficAmount, url}) => {
-						return (
-							<ClayList.Item flex key={url}>
-								<ClayList.ItemField expand>
-									<ClayList.ItemText>
-										<span
-											className="text-truncate-inline"
-											data-tooltip-align="top"
-											title={url}
-										>
-											<a
-												className="c-mr-2 text-primary text-truncate"
-												href={url}
-												target="_blank"
+				<>
+					{referringDomains
+						.slice(
+							0,
+							isReferringDomainsExpanded ? 10 : ITEMS_TO_SHOW
+						)
+						.map(({trafficAmount, url}) => {
+							return (
+								<ClayList.Item flex key={url}>
+									<ClayList.ItemField expand>
+										<ClayList.ItemText>
+											<span
+												className="text-truncate-inline"
+												data-tooltip-align="top"
+												title={url}
 											>
-												{url}
-											</a>
-										</span>
-									</ClayList.ItemText>
-								</ClayList.ItemField>
+												<a
+													className="c-mr-2 text-primary text-truncate"
+													href={url}
+													target="_blank"
+												>
+													{url}
+												</a>
+											</span>
+										</ClayList.ItemText>
+									</ClayList.ItemField>
 
-								<ClayList.ItemField expand>
-									<span className="align-self-end font-weight-semi-bold text-dark">
-										{numberFormat(
-											languageTag,
-											trafficAmount
-										)}
-									</span>
-								</ClayList.ItemField>
-							</ClayList.Item>
-						);
-					})}
+									<ClayList.ItemField expand>
+										<span className="align-self-end font-weight-semi-bold text-dark">
+											{numberFormat(
+												languageTag
+													? languageTag
+													: DEFAULT_LANGUAGE_TAG,
+												trafficAmount
+											)}
+										</span>
+									</ClayList.ItemField>
+								</ClayList.Item>
+							);
+						})}
+				</>
 			</ClayList>
 
 			{referringDomains.length > 5 && (
@@ -323,7 +365,7 @@ export default function ReferralDetail({
 							!isReferringDomainsExpanded
 						)
 					}
-					small
+					size="sm"
 				>
 					{isReferringDomainsExpanded ? (
 						<span>{Liferay.Language.get('view-less')}</span>
@@ -335,17 +377,3 @@ export default function ReferralDetail({
 		</div>
 	);
 }
-
-ReferralDetail.propTypes = {
-	currentPage: PropTypes.object.isRequired,
-	handleDetailPeriodChange: PropTypes.func.isRequired,
-	timeSpanOptions: PropTypes.arrayOf(
-		PropTypes.shape({
-			key: PropTypes.string,
-			label: PropTypes.string,
-		})
-	).isRequired,
-	trafficShareDataProvider: PropTypes.func.isRequired,
-	trafficSourcesDataProvider: PropTypes.func.isRequired,
-	trafficVolumeDataProvider: PropTypes.func.isRequired,
-};

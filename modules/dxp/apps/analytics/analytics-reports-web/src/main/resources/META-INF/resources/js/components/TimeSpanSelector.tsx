@@ -10,7 +10,7 @@ import React, {useContext} from 'react';
 import {ChartDispatchContext, TimeSpan} from '../context/ChartStateContext';
 import ConnectionContext from '../context/ConnectionContext';
 
-interface TimeSpanOption {
+export interface TimeSpanOption {
 	key: TimeSpan;
 	label: string;
 }
@@ -18,7 +18,7 @@ interface TimeSpanOption {
 interface Props {
 	disabledNextTimeSpan: boolean;
 	disabledPreviousPeriodButton: boolean;
-	timeSpanKey: TimeSpan;
+	timeSpanKey?: TimeSpan;
 	timeSpanOptions: TimeSpanOption[];
 }
 
