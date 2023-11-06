@@ -5,7 +5,7 @@
 
 import React from 'react';
 
-export default function Drawer({children}) {
+export default function Drawer({children}: {children: React.ReactNode}) {
 	return (
 		<section className="traffic-source-detail-drawer">{children}</section>
 	);
